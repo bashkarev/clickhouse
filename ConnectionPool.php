@@ -7,13 +7,12 @@
 
 namespace bashkarev\clickhouse;
 
-use yii\base\Object;
 use yii\db\Exception;
 
 /**
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
  */
-class SocketMap extends Object
+class ConnectionPool
 {
     /**
      * @var Connection
@@ -27,6 +26,11 @@ class SocketMap extends Object
      * @var array
      */
     private $_lock;
+
+    public function __construct(Connection $db)
+    {
+        $this->db = $db;
+    }
 
     /**
      * @return resource
@@ -75,15 +79,27 @@ class SocketMap extends Object
     }
 
     /**
+     * @return int total open socket connections
+     */
+    public function total()
+    {
+        if ($this->_sockets === []) {
+            return 0;
+        }
+        return count($this->_sockets);
+    }
+
+    /**
      * @return resource
      * @throws Exception
      */
     protected function create()
     {
-        $socket = @stream_socket_client($this->db->dsn, $code, $message);
+        $socket = @stream_socket_client($this->db->getConfiguration()->getAddress(), $code, $message);
         if ($socket === false) {
-            throw new Exception($code, $message);
+            throw new Exception($message, [], $code);
         }
+        stream_set_blocking($socket, false);
         \Yii::trace("Opening clickhouse DB connection: {$this->db->dsn} ($socket)", __METHOD__);
         $this->_sockets[] = $socket;
         return $socket;

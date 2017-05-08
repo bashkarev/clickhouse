@@ -34,10 +34,27 @@ class Command extends \yii\db\Command
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
             throw $e;
         }
-        if ($method == 'fetch') {
-            return array_shift($result);
+        if ($method == '') {
+            return $result;
         }
-        return $result;
+
+        return call_user_func_array([$this, $method], [$result, $fetchMode]);
+    }
+
+    protected function fetchColumn($result, $mode)
+    {
+        if (!isset($result[0])) {
+            return false;
+        }
+        return array_values($result[0])[0];
+    }
+
+    protected function fetch($result, $mode)
+    {
+        if (!isset($result[0])) {
+            return [];
+        }
+        return $result[0];
     }
 
     /**

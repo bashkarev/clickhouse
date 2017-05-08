@@ -9,6 +9,7 @@ namespace bashkarev\clickhouse;
 
 use yii\db\Exception;
 
+
 /**
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
  */
@@ -132,6 +133,9 @@ class Parser
      */
     public function parseHeader($line)
     {
+        if($line === false){
+            return;
+        }
         $line = rtrim($line, " \n\r");
         if ($this->httpCode === null) {
             $this->parseCode($line);

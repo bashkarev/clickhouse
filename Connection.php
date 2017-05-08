@@ -24,20 +24,28 @@ class Connection extends \yii\db\Connection
      */
     public $commandClass = 'bashkarev\clickhouse\command';
     /**
+     * @inheritdoc
+     */
+    public $driverName = 'clickhouse';
+    /**
      * @var Schema
      */
     private $_schema;
     /**
-     * @var SocketMap
+     * @var ConnectionPool
      */
-    private $_socketMap;
+    private $_pool;
+    /**
+     * @var Configuration
+     */
+    private $_configuration;
 
     /**
      * @inheritdoc
      */
     public function open()
     {
-        $this->getSocketMap()->open();
+        $this->getPool()->open();
     }
 
     /**
@@ -45,8 +53,8 @@ class Connection extends \yii\db\Connection
      */
     public function close()
     {
-        if ($this->_socketMap !== null) {
-            $this->_socketMap->close();
+        if ($this->_pool !== null) {
+            $this->_pool->close();
         }
     }
 
@@ -57,9 +65,9 @@ class Connection extends \yii\db\Connection
      */
     public function executeCommand($sql, $forRead = true)
     {
-        $socket = $this->getSocketMap()->open();
+        $socket = $this->getPool()->open();
         fwrite($socket, $this->createRequest($sql, $forRead));
-        $this->getSocketMap()->lock($socket);
+        $this->getPool()->lock($socket);
         $parser = new Parser($forRead);
         while (true) {
             $position = $parser->getPosition();
@@ -82,7 +90,7 @@ class Connection extends \yii\db\Connection
                 break 1;
             }
         }
-        $this->getSocketMap()->unlock($socket);
+        $this->getPool()->unlock($socket);
     }
 
     /**
@@ -100,17 +108,33 @@ class Connection extends \yii\db\Connection
     }
 
     /**
-     * @return SocketMap
+     * @return ConnectionPool
      */
-    public function getSocketMap()
+    public function getPool()
     {
-        if ($this->_socketMap === null) {
-            $this->_socketMap = Yii::createObject([
-                'class' => 'bashkarev\clickhouse\SocketMap',
-                'db' => $this
-            ]);
+        if ($this->_pool === null) {
+            $this->_pool = new ConnectionPool($this);
         }
-        return $this->_socketMap;
+        return $this->_pool;
+    }
+
+    /**
+     * @return Configuration
+     */
+    public function getConfiguration()
+    {
+        if ($this->_configuration === null) {
+            $this->_configuration = new Configuration($this->dsn, $this->username, $this->password);
+        }
+        return $this->_configuration;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getIsActive()
+    {
+        return ($this->_pool !== null && $this->_pool->total() !== 0);
     }
 
     /**
@@ -148,16 +172,16 @@ class Connection extends \yii\db\Connection
     protected function createRequest($sql, $forRead)
     {
         $data = $sql;
+        $url = $this->getConfiguration()->prepareUrl();
         if ($forRead === true) {
             $data .= ' FORMAT JSONEachRow';
         }
-        $header = "POST / HTTP/1.1\r\n";
+        $header = "POST $url HTTP/1.1\r\n";
         $header .= "Content-Length: " . strlen($data) . "\r\n";
         $header .= "\r\n";
         $header .= $data;
 
         return $header;
     }
-
 
 }

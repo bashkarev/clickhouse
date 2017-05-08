@@ -25,10 +25,14 @@ return [
     //....
     'clickhouse' => [
         'class' => 'bashkarev\clickhouse\Connection',
-        'dsn' => 'tcp://localhost:8823'
-    ],
+        'dsn' => 'host=localhost;port=8823;database=default;connect_timeout_with_failover_ms=10',
+        'username' => 'default',
+        'password' => 'default'
+    ]
 ];
 ```
+
+[All settings](https://clickhouse.yandex/reference_en.html#Settings)
 
 
 Using DebugPanel

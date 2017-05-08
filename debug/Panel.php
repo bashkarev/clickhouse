@@ -42,6 +42,14 @@ class Panel extends DbPanel
     /**
      * @inheritdoc
      */
+    protected function hasExplain()
+    {
+        return false;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getProfileLogs()
     {
         $target = $this->module->logTarget;
