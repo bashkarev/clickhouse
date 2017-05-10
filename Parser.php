@@ -9,7 +9,6 @@ namespace bashkarev\clickhouse;
 
 use yii\db\Exception;
 
-
 /**
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
  */
@@ -50,19 +49,31 @@ class Parser
     }
 
     /**
-     * @return int
+     * @param resource $socket
+     * @return \Generator
      */
-    public function getPosition()
+    public function run($socket)
     {
-        return $this->position;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLength()
-    {
-        return $this->length;
+        for (; ;) {
+            if ($this->position === self::POS_HEADER) {
+                $this->parseHeader(fgets($socket, 1024));
+            }
+            if ($this->position === self::POS_LENGTH) {
+                $this->parseLength(fgets($socket, 11));
+            }
+            if ($this->position === self::POS_CONTENT) {
+                foreach ($this->parseContent(fread($socket, $this->length)) as $value) {
+                    yield $value;
+                }
+            }
+            if ($this->position === self::POS_END) {
+                fseek($socket, 2, SEEK_CUR); // \r\n end
+                if (($last = $this->getLastContent()) !== null) {
+                    yield $last;
+                }
+                break 1;
+            }
+        }
     }
 
     /**
@@ -70,7 +81,7 @@ class Parser
      * @return \Generator
      * @throws Exception
      */
-    public function parseContent($buffer)
+    protected function parseContent($buffer)
     {
         if ($this->httpCode !== 200) {
             throw new Exception($buffer);
@@ -112,7 +123,7 @@ class Parser
     /**
      * @return mixed
      */
-    public function getLastContent()
+    protected function getLastContent()
     {
         if ($this->last) {
             return null;
@@ -121,19 +132,11 @@ class Parser
     }
 
     /**
-     * @return bool
-     */
-    public function isEnd()
-    {
-        return $this->position === self::POS_END;
-    }
-
-    /**
      * @param $line
      */
-    public function parseHeader($line)
+    protected function parseHeader($line)
     {
-        if($line === false){
+        if ($line === false) {
             return;
         }
         $line = rtrim($line, " \n\r");
@@ -149,7 +152,7 @@ class Parser
     /**
      * @param $line
      */
-    public function parseLength($line)
+    protected function parseLength($line)
     {
         $line = rtrim($line, " \n\r");
         if ($line === '') {

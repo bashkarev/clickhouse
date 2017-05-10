@@ -61,7 +61,7 @@ abstract class DatabaseTestCase extends TestCase
             $lines = explode(';', file_get_contents($fixture));
             foreach ($lines as $line) {
                 if (trim($line) !== '') {
-                    $db->executeCommand($line, false);
+                    $db->createCommand($line)->execute();
                 }
             }
         }

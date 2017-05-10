@@ -59,38 +59,25 @@ class Connection extends \yii\db\Connection
     }
 
     /**
-     * @param $sql
      * @param bool $forRead
      * @return \Generator
      */
-    public function executeCommand($sql, $forRead = true)
+    public function execute($forRead = true)
     {
-        $socket = $this->getPool()->open();
-        fwrite($socket, $this->createRequest($sql, $forRead));
-        $this->getPool()->lock($socket);
-        $parser = new Parser($forRead);
-        while (true) {
-            $position = $parser->getPosition();
-            if ($position === Parser::POS_HEADER) {
-                $parser->parseHeader(fgets($socket, 1024));
-            }
-            if ($position === Parser::POS_LENGTH) {
-                $parser->parseLength(fgets($socket, 11));
-            }
-            if ($position === Parser::POS_CONTENT) {
-                foreach ($parser->parseContent(fread($socket, $parser->getLength())) as $value) {
-                    yield $value;
-                }
-            }
-            if ($position === Parser::POS_END) {
-                fseek($socket, 2, SEEK_CUR); // \r\n end
-                if (($last = $parser->getLastContent()) !== null) {
-                    yield $last;
-                }
+        $pool = $this->getPool();
+        $socket = $pool->open();
+        $pool->lock($socket);
+        for (; ;) {
+            $data = yield;
+            if ($data === false) {
                 break 1;
             }
+            fwrite($socket, $data);
         }
-        $this->getPool()->unlock($socket);
+        foreach ((new Parser($forRead))->run($socket) as $value){
+            yield $value;
+        }
+        $pool->unlock($socket);
     }
 
     /**
@@ -162,26 +149,6 @@ class Connection extends \yii\db\Connection
     public function transaction(callable $callback, $isolationLevel = null)
     {
         throw new NotSupportedException('In the clickhouse database, transactions are not supported');
-    }
-
-    /**
-     * @param string $sql
-     * @param bool $forRead
-     * @return string
-     */
-    protected function createRequest($sql, $forRead)
-    {
-        $data = $sql;
-        $url = $this->getConfiguration()->prepareUrl();
-        if ($forRead === true) {
-            $data .= ' FORMAT JSONEachRow';
-        }
-        $header = "POST $url HTTP/1.1\r\n";
-        $header .= "Content-Length: " . strlen($data) . "\r\n";
-        $header .= "\r\n";
-        $header .= $data;
-
-        return $header;
     }
 
 }
