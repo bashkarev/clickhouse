@@ -24,6 +24,26 @@ class Command extends \yii\db\Command
         $rawSql = $this->getRawSql();
 
         Yii::info($rawSql, 'bashkarev\clickhouse\Command::query');
+        if ($method !== '') {
+            $info = $this->db->getQueryCacheInfo($this->queryCacheDuration, $this->queryCacheDependency);
+            if (is_array($info)) {
+                /* @var $cache \yii\caching\Cache */
+                $cache = $info[0];
+                $cacheKey = [
+                    __CLASS__,
+                    $method,
+                    $fetchMode,
+                    $this->db->dsn,
+                    $this->db->username,
+                    $rawSql,
+                ];
+                $result = $cache->get($cacheKey);
+                if (is_array($result) && isset($result[0])) {
+                    Yii::trace('Query result served from cache', 'bashkarev\clickhouse\Command::query');
+                    return $result[0];
+                }
+            }
+        }
         $generator = $this->db->execute(true);
         $token = $rawSql;
         try {
@@ -32,13 +52,17 @@ class Command extends \yii\db\Command
             $generator->send(false);
             if ($method === '') {
                 return $generator;
-            } else {
-                $result = call_user_func_array([$this, $method], [$generator, $fetchMode]);
             }
+            $result = call_user_func_array([$this, $method], [$generator, $fetchMode]);
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
         } catch (\Exception $e) {
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
             throw $e;
+        }
+
+        if (isset($cache, $cacheKey, $info)) {
+            $cache->set($cacheKey, [$result], $info[1], $info[2]);
+            Yii::trace('Saved query result in cache', 'bashkarev\clickhouse\Command::query');
         }
         return $result;
     }

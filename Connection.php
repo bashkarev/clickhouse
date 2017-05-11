@@ -11,6 +11,8 @@ use Yii;
 use yii\base\NotSupportedException;
 
 /**
+ * @method Command createCommand($sql = null, $params = [])
+ *
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
  */
 class Connection extends \yii\db\Connection
