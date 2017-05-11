@@ -36,11 +36,6 @@ class ParserTest extends TestCase
         iterator_to_array($this->getParserGenerator('error.txt'));
     }
 
-    public function testTimeout()
-    {
-        //toDo
-    }
-
     /**
      * @param string $file
      * @param bool $forRead

@@ -7,6 +7,8 @@
 
 namespace bashkarev\clickhouse;
 
+use yii\base\InvalidParamException;
+
 /**
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
  */
@@ -33,13 +35,13 @@ class Configuration
      */
     public function __construct($dsn, $user, $password)
     {
+        $this->prepare($dsn);
         if ($user !== null && $user !== '') {
             $this->options['user'] = $user;
         }
         if ($password !== null && $password !== '') {
             $this->options['password'] = $password;
         }
-        $this->prepare($dsn);
     }
 
     /**
@@ -50,6 +52,9 @@ class Configuration
     {
         if ($options === [] && $this->options === []) {
             return $this->url;
+        }
+        if (isset($options['user']) || isset($options['password'])) {
+            throw new InvalidParamException('Do not change user or password');
         }
         return $this->url . '?' . http_build_query(array_merge($this->options, $options));
     }
@@ -68,7 +73,7 @@ class Configuration
     protected function prepare($dsn)
     {
         foreach (explode(';', $dsn) as $item) {
-            if ($item === '' || strpos($item,'=') === false) {
+            if ($item === '' || strpos($item, '=') === false) {
                 continue;
             }
             list($key, $value) = explode('=', $item);
