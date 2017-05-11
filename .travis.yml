@@ -8,8 +8,12 @@ php:
 services:
     - docker
 
+install:
+    - travis_retry composer self-update && composer --version
+    - travis_retry composer global require "fxp/composer-asset-plugin:^1.2.0"
+    - travis_retry composer install --prefer-dist --no-interaction
+
 before_script:
     - docker run -d -p 127.0.0.1:8123:8123 --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:1.1.54159
-    - composer install
 
 script: ./vendor/bin/phpunit
