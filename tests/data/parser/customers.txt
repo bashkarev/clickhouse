@@ -1,0 +1,13 @@
+HTTP/1.1 200 OK
+Date: Thu, 11 May 2017 19:00:20 GMT
+Connection: Keep-Alive
+Content-Type: text/plain; charset=UTF-8
+Transfer-Encoding: chunked
+Keep-Alive: timeout=3
+
+129
+{"id":1,"email":"user1@example.com","name":"user1","address":"address1","status":1,"profile_id":1}
+{"id":2,"email":"user2@example.com","name":"user2","address":"address2","status":1,"profile_id":0}
+{"id":3,"email":"user3@example.com","name":"user3","address":"address3","status":2,"profile_id":2}
+0
+

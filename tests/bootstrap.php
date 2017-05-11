@@ -15,4 +15,4 @@ if (is_file($composerAutoload)) {
     require_once($composerAutoload);
 }
 require_once(__DIR__ . '/../vendor/yiisoft/yii2/Yii.php');
-Yii::setAlias('@csv', __DIR__ . '/data/csv');
+Yii::setAlias('@data', __DIR__ . '/data');

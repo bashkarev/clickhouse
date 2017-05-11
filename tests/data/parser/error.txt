@@ -1,0 +1,11 @@
+HTTP/1.1 500 Internal Server Error
+Date: Thu, 11 May 2017 19:00:20 GMT
+Connection: Keep-Alive
+Content-Type: text/plain; charset=UTF-8
+Transfer-Encoding: chunked
+Keep-Alive: timeout=3
+
+84
+Code: 62, e.displayText() = DB::Exception: Syntax error: failed at position 1: bad SQL, expected OPTIMIZE, e.what() = DB::Exception
+0
+

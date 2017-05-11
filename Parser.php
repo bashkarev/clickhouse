@@ -125,7 +125,7 @@ class Parser
      */
     protected function getLastContent()
     {
-        if ($this->last) {
+        if ($this->last === null) {
             return null;
         }
         return $this->parseContentLine($this->last);

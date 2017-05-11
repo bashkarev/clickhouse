@@ -33,9 +33,9 @@ class InsertFilesTest extends DatabaseTestCase
     public function testExecute()
     {
         $this->getInsertFiles()->setFiles([
-            '@csv/e1e747f9901e67ca121768b36921fbae.csv',
-            '@csv/ebe191dfc36d73aece91e92007d24e3e.csv',
-            '@csv/empty.csv'
+            '@data/csv/e1e747f9901e67ca121768b36921fbae.csv',
+            '@data/csv/ebe191dfc36d73aece91e92007d24e3e.csv',
+            '@data/csv/empty.csv'
         ])->execute();
         $count = (new Query)->from('csv')->count('*', $this->getConnection(false, false));
         $this->assertContains('2000', $count);
@@ -44,7 +44,7 @@ class InsertFilesTest extends DatabaseTestCase
     public function testInvalidFile()
     {
         $this->expectException(Exception::class);
-        $this->getInsertFiles()->setFiles('@csv/not_valid.csv')->execute();
+        $this->getInsertFiles()->setFiles('@data/csv/not_valid.csv')->execute();
     }
 
     /**
