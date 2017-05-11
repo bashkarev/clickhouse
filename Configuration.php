@@ -68,7 +68,7 @@ class Configuration
     protected function prepare($dsn)
     {
         foreach (explode(';', $dsn) as $item) {
-            if ($item === '') {
+            if ($item === '' || strpos($item,'=') === false) {
                 continue;
             }
             list($key, $value) = explode('=', $item);

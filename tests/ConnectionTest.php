@@ -40,7 +40,7 @@ class ConnectionTest extends DatabaseTestCase
         $this->assertFalse($connection->isActive);
 
         $connection = new Connection();
-        $connection->dsn = 'unknown::memory:';
+        $connection->dsn = 'port=unknown';
         $this->expectException(Exception::class);
         $connection->open();
     }
