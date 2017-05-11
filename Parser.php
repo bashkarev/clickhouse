@@ -150,7 +150,7 @@ class Parser
             $this->parseCode($line);
         }
 
-        if ($line === self::CRLF) {
+        if ($line === self::CRLF || $line === PHP_EOL) {
             $this->position = self::POS_LENGTH;
         }
     }
