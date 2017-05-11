@@ -22,7 +22,7 @@ class Connection extends \yii\db\Connection
     /**
      * @inheritdoc
      */
-    public $commandClass = 'bashkarev\clickhouse\command';
+    public $commandClass = 'bashkarev\clickhouse\Command';
     /**
      * @inheritdoc
      */
