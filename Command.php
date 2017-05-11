@@ -26,46 +26,21 @@ class Command extends \yii\db\Command
         Yii::info($rawSql, 'bashkarev\clickhouse\Command::query');
         $generator = $this->db->execute(true);
         $token = $rawSql;
-        $result = [];
         try {
             Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');
             $generator->send($this->createRequest($rawSql, true));
             $generator->send(false);
-            while ($generator->valid()) {
-                $result[] = $generator->current();
-                $generator->next();
+            if ($method === '') {
+                return $generator;
+            } else {
+                $result = call_user_func_array([$this, $method], [$generator, $fetchMode]);
             }
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
         } catch (\Exception $e) {
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
             throw $e;
         }
-        if ($method === '') {
-            return $result;
-        }
-
-        return call_user_func_array([$this, $method], [$result, $fetchMode]);
-    }
-
-    protected function fetchAll($result, $mode)
-    {
         return $result;
-    }
-
-    protected function fetchColumn($result, $mode)
-    {
-        if (!isset($result[0])) {
-            return false;
-        }
-        return array_values($result[0])[0];
-    }
-
-    protected function fetch($result, $mode)
-    {
-        if (!isset($result[0])) {
-            return [];
-        }
-        return $result[0];
     }
 
     /**
@@ -164,6 +139,54 @@ class Command extends \yii\db\Command
         $header .= $data;
 
         return $header;
+    }
+
+    /**
+     * @param \Generator $generator
+     * @param int $mode
+     * @return array
+     */
+    protected function fetchAll(\Generator $generator, $mode)
+    {
+        $result = [];
+        if ($mode === \PDO::FETCH_COLUMN) {
+            while ($generator->valid()) {
+                $result[] = current($generator->current());
+                $generator->next();
+            }
+        } else {
+            while ($generator->valid()) {
+                $result[] = $generator->current();
+                $generator->next();
+            }
+        }
+        return $result;
+    }
+
+    /**
+     * @param \Generator $generator
+     * @param $mode
+     * @return bool|mixed
+     */
+    protected function fetchColumn(\Generator $generator, $mode)
+    {
+        if (!$generator->valid()) {
+            return false;
+        }
+        return current($generator->current());
+    }
+
+    /**
+     * @param \Generator $generator
+     * @param $mode
+     * @return bool|mixed
+     */
+    protected function fetch(\Generator $generator, $mode)
+    {
+        if (!$generator->valid()) {
+            return false;
+        }
+        return $generator->current();
     }
 
 }
