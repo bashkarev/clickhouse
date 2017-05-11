@@ -3,6 +3,8 @@ Extension ClickHouse for Yii 2
 
 This extension provides the [ClickHouse](https://clickhouse.yandex/) integration for the [Yii framework 2.0](http://www.yiiframework.com).
 
+[![Build Status](https://travis-ci.org/bashkarev/clickhouse.svg?branch=master)](https://travis-ci.org/bashkarev/clickhouse)
+
 Installation
 ------------
 
