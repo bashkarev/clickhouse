@@ -1,7 +1,9 @@
 {
     "name": "bashkarev/clickhouse",
     "description": "Driver yii2 for column-oriented database ClickHouse.",
-    "type": "library",
+    "keywords": ["yii2", "clickhouse"],
+    "type": "yii2-extension",
+    "license": "MIT",
     "require": {
         "php": ">=5.6",
         "yiisoft/yii2": "~2.0.11"
