@@ -3,7 +3,7 @@
 $config = [
     'database' => [
         'class' => 'bashkarev\clickhouse\Connection',
-        'dsn' => 'host=localhost;database=default;port=8823;',
+        'dsn' => 'host=localhost;database=default;port=8123;',
         'username' => 'default',
         'password' => '',
         'fixture' => __DIR__ . '/clickhouse.sql',

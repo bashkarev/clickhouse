@@ -1,0 +1,12 @@
+language: php
+
+php:
+    - 5.6
+    - 7
+    - 7.1
+
+before_script:
+    - docker run -d -p 127.0.0.1:8123:8123 --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:1.1.54159
+    - composer install
+
+script: ./vendor/bin/phpunit
