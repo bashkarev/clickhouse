@@ -9,6 +9,7 @@ namespace bashkarev\clickhouse\tests;
 
 use bashkarev\clickhouse\Connection;
 use yii\base\NotSupportedException;
+use yii\db\Exception;
 
 /**
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
@@ -40,7 +41,7 @@ class ConnectionTest extends DatabaseTestCase
 
         $connection = new Connection();
         $connection->dsn = 'unknown::memory:';
-        $this->expectException('yii\db\Exception');
+        $this->expectException(Exception::class);
         $connection->open();
     }
 
