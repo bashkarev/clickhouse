@@ -19,6 +19,8 @@ class Parser
     const POS_CONTENT = 0x03;
     const POS_END = 0x04;
 
+    const CRLF = "\r\n";
+
     /**
      * @var int
      */
@@ -56,10 +58,18 @@ class Parser
     {
         for (; ;) {
             if ($this->position === self::POS_HEADER) {
-                $this->parseHeader(fgets($socket, 1024));
+                $line = fgets($socket, 1024);
+                if ($line === false) {
+                    continue;
+                }
+                $this->parseHeader($line);
             }
             if ($this->position === self::POS_LENGTH) {
-                $this->parseLength(fgets($socket, 11));
+                $line = fgets($socket, 11);
+                if ($line === false || $line === self::CRLF) {
+                    continue;
+                }
+                $this->parseLength($line);
             }
             if ($this->position === self::POS_CONTENT) {
                 foreach ($this->parseContent(fread($socket, $this->length)) as $value) {
@@ -136,15 +146,11 @@ class Parser
      */
     protected function parseHeader($line)
     {
-        if ($line === false) {
-            return;
-        }
-        $line = rtrim($line, " \n\r");
         if ($this->httpCode === null) {
             $this->parseCode($line);
         }
 
-        if ($line === '') {
+        if ($line === self::CRLF) {
             $this->position = self::POS_LENGTH;
         }
     }
@@ -154,11 +160,6 @@ class Parser
      */
     protected function parseLength($line)
     {
-        $line = rtrim($line, " \n\r");
-        if ($line === '') {
-            return;
-        }
-
         $this->length = hexdec($line);
         $this->position = ($this->length === 0) ? self::POS_END : self::POS_CONTENT;
     }
