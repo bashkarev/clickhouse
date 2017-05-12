@@ -38,12 +38,11 @@ class ParserTest extends TestCase
 
     /**
      * @param string $file
-     * @param bool $forRead
      * @return \Generator
      */
-    protected function getParserGenerator($file, $forRead = true)
+    protected function getParserGenerator($file)
     {
-        return (new Parser($forRead))->run(fopen(Yii::getAlias("@data/parser/$file"), 'rb'));
+        return (new Parser())->run(fopen(Yii::getAlias("@data/parser/$file"), 'rb'));
     }
 
 

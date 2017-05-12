@@ -26,29 +26,17 @@ class Parser
      */
     protected $position = 0x01;
     /**
-     * @var bool
-     */
-    protected $forRead;
-    /**
      * @var int
      */
     protected $httpCode;
     /**
-     * @var integer
+     * @var int
      */
     protected $length;
     /**
      * @var string
      */
     protected $last;
-
-    /**
-     * @param bool $forRead
-     */
-    public function __construct($forRead)
-    {
-        $this->forRead = $forRead;
-    }
 
     /**
      * @param resource $socket
@@ -72,9 +60,7 @@ class Parser
                 $this->parseLength($line);
             }
             if ($this->position === self::POS_CONTENT) {
-                foreach ($this->parseContent(fread($socket, $this->length)) as $value) {
-                    yield $value;
-                }
+                yield from $this->parseContent(fread($socket, $this->length));
             }
             if ($this->position === self::POS_END) {
                 fseek($socket, 2, SEEK_CUR); // \r\n end
@@ -123,10 +109,6 @@ class Parser
      */
     protected function parseContentLine($value)
     {
-        if ($this->forRead === false || $value === '') {
-            return null;
-        }
-
         return json_decode($value, true);
     }
 
@@ -135,7 +117,7 @@ class Parser
      */
     protected function getLastContent()
     {
-        if ($this->last === null) {
+        if ($this->last === null || $this->last === '') {
             return null;
         }
         return $this->parseContentLine($this->last);

@@ -19,13 +19,13 @@ class ConnectionPool
      */
     public $db;
     /**
-     * @var array
+     * @var Socket[]
      */
     private $_sockets = [];
     /**
-     * @var array
+     * @var Socket
      */
-    private $_lock;
+    private $_main;
 
     public function __construct(Connection $db)
     {
@@ -33,18 +33,34 @@ class ConnectionPool
     }
 
     /**
-     * @return resource
+     * @return Socket
      * @throws Exception
      */
     public function open()
     {
+        $main = $this->getMain();
+        if ($main->isLocked() === false) {
+            return $main;
+        }
         foreach ($this->_sockets as $socket) {
-            $id = (int)$socket;
-            if (!isset($this->_lock[$id])) {
+            if ($socket->isLocked() === false) {
                 return $socket;
             }
         }
-        return $this->create();
+        $socket = new Socket($this->db->getConfiguration());
+        $this->_sockets[] = $socket;
+        return $socket;
+    }
+
+    /**
+     * @return Socket
+     */
+    protected function getMain()
+    {
+        if ($this->_main === null) {
+            $this->_main = new Socket($this->db->getConfiguration());
+        }
+        return $this->_main;
     }
 
     /**
@@ -52,30 +68,15 @@ class ConnectionPool
      */
     public function close()
     {
-        foreach ($this->_sockets as $socket) {
-            \Yii::trace("Closing clickhouse DB connection: {$this->db->dsn} ($socket)", __METHOD__);
-            @fwrite($socket, "Connection: Close \r\n");
-            stream_socket_shutdown($socket, STREAM_SHUT_RDWR);
+        if ($this->_main === null) {
+            return;
         }
+        $this->_main->close();
+        foreach ($this->_sockets as $socket) {
+            $socket->close();
+        }
+        $this->_main = null;
         $this->_sockets = [];
-    }
-
-    /**
-     * Lock resource
-     * @param resource $socket
-     */
-    public function lock($socket)
-    {
-        $this->_lock[(int)$socket] = true;
-    }
-
-    /**
-     * Unlock resource
-     * @param resource $socket
-     */
-    public function unlock($socket)
-    {
-        unset($this->_lock[(int)$socket]);
     }
 
     /**
@@ -83,26 +84,10 @@ class ConnectionPool
      */
     public function total()
     {
-        if ($this->_sockets === []) {
+        if ($this->_main === null) {
             return 0;
         }
-        return count($this->_sockets);
-    }
-
-    /**
-     * @return resource
-     * @throws Exception
-     */
-    protected function create()
-    {
-        $socket = @stream_socket_client($this->db->getConfiguration()->getAddress(), $code, $message);
-        if ($socket === false) {
-            throw new Exception($message, [], $code);
-        }
-        stream_set_blocking($socket, false);
-        \Yii::trace("Opening clickhouse DB connection: {$this->db->dsn} ($socket)", __METHOD__);
-        $this->_sockets[] = $socket;
-        return $socket;
+        return count($this->_sockets) + 1;
     }
 
 }

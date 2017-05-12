@@ -44,7 +44,7 @@ class Command extends \yii\db\Command
                 }
             }
         }
-        $generator = $this->db->execute(true);
+        $generator = $this->db->execute();
         $token = $rawSql;
         try {
             Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');
@@ -79,7 +79,7 @@ class Command extends \yii\db\Command
         if ($this->sql == '') {
             return 0;
         }
-        $generator = $this->db->execute(false);
+        $generator = $this->db->execute();
         $token = $rawSql;
         try {
             Yii::beginProfile($token, __METHOD__);
@@ -108,7 +108,7 @@ class Command extends \yii\db\Command
         $count = 0;
         $rows = [];
         Yii::info($rawSql, 'bashkarev\clickhouse\Command::query');
-        $generator = $this->db->execute(true);
+        $generator = $this->db->execute();
         $token = $rawSql;
         try {
             Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');

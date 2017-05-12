@@ -61,25 +61,22 @@ class Connection extends \yii\db\Connection
     }
 
     /**
-     * @param bool $forRead
      * @return \Generator
      */
-    public function execute($forRead = true)
+    public function execute()
     {
-        $pool = $this->getPool();
-        $socket = $pool->open();
-        $pool->lock($socket);
+        $socket = $this->getPool()->open();
+        $socket->lock();
+        $handle = $socket->getNative();
         for (; ;) {
             $data = yield;
             if ($data === false) {
                 break 1;
             }
-            fwrite($socket, $data);
+            fwrite($handle, $data);
         }
-        foreach ((new Parser($forRead))->run($socket) as $value){
-            yield $value;
-        }
-        $pool->unlock($socket);
+        yield from (new Parser())->run($handle);
+        $socket->unlock();
     }
 
     /**
