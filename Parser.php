@@ -44,7 +44,7 @@ class Parser
      */
     public function run($socket)
     {
-        for (; ;) {
+        while (true) {
             if ($this->position === self::POS_HEADER) {
                 $line = fgets($socket, 1024);
                 if ($line === false) {

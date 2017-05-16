@@ -105,24 +105,23 @@ class InsertFiles
         Yii::info($token, 'bashkarev\clickhouse\Command::query');
         Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');
         $handle = fopen($file, 'rb');
-        $generator = $this->db->execute(false);
+        $generator = $this->db->execute();
         $generator->send("POST {$this->url} HTTP/1.1\r\n");
         $generator->send("Transfer-Encoding: chunked\r\n\r\n");
-        while (feof($handle) === false) {
-            $data = fread($handle, $this->chunkSize);
-            if ($data === '') {
-                continue;
-            }
 
-            $length = strlen($data);
+        while (true) {
+            $data = fread($handle, $this->chunkSize);
+            if ($data === false || ($length = strlen($data)) === 0) {
+                $generator->send("0\r\n\r\n");
+                $generator->send(false);
+                break 1;
+            }
             $generator->send(dechex($length) . "\r\n");
             $generator->send($data . "\r\n");
             yield;
         }
-
         fclose($handle);
-        $generator->send("0\r\n\r\n");
-        $generator->send(false);
+
         while ($generator->valid()) {
             $generator->next();
             yield;
