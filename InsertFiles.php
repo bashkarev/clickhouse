@@ -8,6 +8,7 @@
 namespace bashkarev\clickhouse;
 
 use Yii;
+use yii\base\InvalidParamException;
 use yii\db\Exception;
 
 /**
@@ -18,7 +19,7 @@ class InsertFiles
     /**
      * @var int Maximum chunk size.
      */
-    public $chunkSize = 4096;
+    protected $chunkSize = 4096;
     /**
      * @var Connection
      */
@@ -63,12 +64,30 @@ class InsertFiles
             $files = (array)$files;
         }
         foreach ($files as $file) {
-            $file = \Yii::getAlias($file);
-            if (file_exists($file) === false) {
-                throw new FileNotFoundException("File: `{$file}` not found");
+            if (is_resource($file)) {
+                rewind($file);
+            } else {
+                $file = \Yii::getAlias($file);
+                if (file_exists($file) === false) {
+                    throw new FileNotFoundException("File: `{$file}` not found");
+                }
             }
             $this->files[] = $file;
         }
+        return $this;
+    }
+
+    /**
+     * @param int $size
+     * @return $this
+     */
+    public function setChunkSize($size)
+    {
+        $size = (int)$size;
+        if ($size < 1) {
+            throw new InvalidParamException('The size must be greater than 0');
+        }
+        $this->chunkSize = $size;
         return $this;
     }
 
@@ -95,20 +114,26 @@ class InsertFiles
     }
 
     /**
-     * @param $file
+     * @param string|resource $file
      * @return \Generator
      */
     protected function runItem($file)
     {
-        $token = $this->sql . ' `' . basename($file) . '`';
+        if (is_resource($file)) {
+            $closeFile = false;
+            $handle = $file;
+            $token = $this->sql . ' `' . $file . '`';
+        } else {
+            $closeFile = true;
+            $handle = fopen($file, 'rb');
+            $token = $this->sql . ' `' . basename($file) . '`';
+        }
 
         Yii::info($token, 'bashkarev\clickhouse\Command::query');
         Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');
-        $handle = fopen($file, 'rb');
         $generator = $this->db->execute();
         $generator->send("POST {$this->url} HTTP/1.1\r\n");
         $generator->send("Transfer-Encoding: chunked\r\n\r\n");
-
         while (true) {
             $data = fread($handle, $this->chunkSize);
             if ($data === false || ($length = strlen($data)) === 0) {
@@ -120,7 +145,10 @@ class InsertFiles
             $generator->send($data . "\r\n");
             yield;
         }
-        fclose($handle);
+
+        if ($closeFile === true) {
+            fclose($handle);
+        }
 
         while ($generator->valid()) {
             $generator->next();

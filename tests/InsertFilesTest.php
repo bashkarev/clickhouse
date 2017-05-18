@@ -18,7 +18,7 @@ use bashkarev\clickhouse\Query;
 class InsertFilesTest extends DatabaseTestCase
 {
 
-    public function testFileAlias()
+    public function testSetFileAlias()
     {
         \Yii::setAlias('@InsertFilesTest', __DIR__);
         $this->assertEquals([__FILE__], $this->getInsertFiles()->setFiles(['@InsertFilesTest/InsertFilesTest.php'])->getFiles());
@@ -39,6 +39,24 @@ class InsertFilesTest extends DatabaseTestCase
         ])->execute();
         $count = (new Query)->from('csv')->count('*', $this->getConnection(false, false));
         $this->assertContains('2000', $count);
+    }
+
+    public function testSetFileResource()
+    {
+        $file = fopen(\Yii::getAlias('@data/csv/e1e747f9901e67ca121768b36921fbae.csv'), 'rb');
+        fseek($file, 100);
+        $insert = $this->getInsertFiles()->setFiles($file);
+        $this->assertTrue((int)$file === (int)$insert->getFiles()[0], 'exist');
+        $this->assertEquals(0, ftell($insert->getFiles()[0]), 'rewind');
+
+        $insert = $this->getInsertFiles()->setFiles([$file]);
+        $this->assertTrue((int)$file === (int)$insert->getFiles()[0], 'exist');
+    }
+
+    public function testInvalidChunkSize()
+    {
+        $this->expectException(\yii\base\InvalidParamException::class);
+        $this->getInsertFiles()->setChunkSize(0);
     }
 
     public function testInvalidFile()

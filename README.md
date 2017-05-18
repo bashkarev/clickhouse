@@ -98,7 +98,9 @@ $insert = Yii::$app->clickhouse->createCommand()->batchInsertFiles('csv',[
     '@vendor/bashkarev/clickhouse/tests/data/csv/e1e747f9901e67ca121768b36921fbae.csv',
     '@vendor/bashkarev/clickhouse/tests/data/csv/ebe191dfc36d73aece91e92007d24e3e.csv',
 ]);
-$insert->chunkSize = 8192; // default 4096
-$insert->execute();
+$insert
+    ->setFiles(fopen('/csv/ebe191dfc36d73aece91e92007d24e3e.csv','rb'))
+    ->setChunkSize(8192) // default 4096 bytes
+    ->execute();
 ```
 
