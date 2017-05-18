@@ -8,7 +8,6 @@
 namespace bashkarev\clickhouse;
 
 use Yii;
-use yii\db\Exception;
 
 /**
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
@@ -39,27 +38,59 @@ class Socket
         $this->open();
     }
 
+    /**
+     * Open socket connection
+     * @throws SocketException
+     */
     public function open()
     {
         $this->socket = @stream_socket_client($this->config->getAddress(), $code, $message);
         if ($this->socket === false) {
-            throw new Exception($message, [], $code);
+            throw new SocketException($message, [], $code);
         }
         if (stream_set_blocking($this->socket, false) === false) {
-            throw new Exception('Failed set non blocking socket');
+            throw new SocketException('Failed set non blocking socket');
         }
         if (YII_DEBUG) {
             Yii::trace("Opening clickhouse DB connection: " . $this->config->getAddress() . "($this->socket)", __METHOD__);
         }
     }
 
+    /**
+     * Close socket connection
+     */
     public function close()
     {
         if (YII_DEBUG) {
             Yii::trace("Closing clickhouse DB connection: " . $this->config->getAddress() . "($this->socket)", __METHOD__);
         }
-        @fwrite($this->socket, "Connection: Close \r\n");
         stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
+    }
+
+    /**
+     * @param string $string
+     * @param null $length
+     * @return int
+     * @throws SocketException
+     */
+    public function write($string, $length = null)
+    {
+        if ($length === null) {
+            $length = strlen($string);
+        }
+
+        $bytes = @fwrite($this->socket, $string);
+        if ($bytes === false) {
+            $message = "Failed to write to socket";
+            if ($error = error_get_last()) {
+                $message .= sprintf(" Errno: %d; %s", $error["type"], $error["message"]);
+            }
+            throw new SocketException($message);
+        }
+        if ($bytes !== $length) {
+            $this->write(substr($string, $bytes));
+        }
+        return $bytes;
     }
 
     /**

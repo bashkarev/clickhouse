@@ -67,15 +67,14 @@ class Connection extends \yii\db\Connection
     {
         $socket = $this->getPool()->open();
         $socket->lock();
-        $handle = $socket->getNative();
         while (true) {
             $data = yield;
             if ($data === false) {
                 break 1;
             }
-            @fwrite($handle, $data);
+            $socket->write($data);
         }
-        yield from (new Parser())->run($handle);
+        yield from (new Parser())->run($socket->getNative());
         $socket->unlock();
     }
 
