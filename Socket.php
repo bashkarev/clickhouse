@@ -52,7 +52,7 @@ class Socket
             throw new SocketException('Failed set non blocking socket');
         }
         if (YII_DEBUG) {
-            Yii::trace("Opening clickhouse DB connection: " . $this->config->getAddress() . "($this->socket)", __METHOD__);
+            Yii::trace("Opening clickhouse DB connection: " . $this->config->getAddress() . " ($this->socket)", __METHOD__);
         }
     }
 
@@ -62,14 +62,14 @@ class Socket
     public function close()
     {
         if (YII_DEBUG) {
-            Yii::trace("Closing clickhouse DB connection: " . $this->config->getAddress() . "($this->socket)", __METHOD__);
+            Yii::trace("Closing clickhouse DB connection: " . $this->config->getAddress() . " ($this->socket)", __METHOD__);
         }
         stream_socket_shutdown($this->socket, STREAM_SHUT_RDWR);
     }
 
     /**
      * @param string $string
-     * @param null $length
+     * @param null|int $length
      * @return int
      * @throws SocketException
      */
