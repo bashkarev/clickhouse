@@ -70,7 +70,6 @@ class Socket
     /**
      * @param string $string
      * @param null|int $length
-     * @return int
      * @throws SocketException
      */
     public function write($string, $length = null)
@@ -79,18 +78,23 @@ class Socket
             $length = strlen($string);
         }
 
-        $bytes = @fwrite($this->socket, $string);
-        if ($bytes === false) {
-            $message = "Failed to write to socket";
-            if ($error = error_get_last()) {
-                $message .= sprintf(" Errno: %d; %s", $error["type"], $error["message"]);
+        while (true) {
+            $bytes = @fwrite($this->socket, $string);
+            if ($bytes === false) {
+                $message = "Failed to write to socket";
+                if ($error = error_get_last()) {
+                    $message .= sprintf(" Errno: %d; %s", $error["type"], $error["message"]);
+                }
+                throw new SocketException($message);
             }
-            throw new SocketException($message);
+
+            if ($bytes < $length) {
+                $string = substr($string, $bytes);
+                $length -= $bytes;
+            } else {
+                break 1;
+            }
         }
-        if ($bytes !== $length) {
-            $this->write(substr($string, $bytes));
-        }
-        return $bytes;
     }
 
     /**

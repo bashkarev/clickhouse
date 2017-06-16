@@ -8,6 +8,8 @@
 namespace bashkarev\clickhouse;
 
 /**
+ * @method Command createCommand($db)
+ *
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
  */
 class ActiveQuery extends \yii\db\ActiveQuery

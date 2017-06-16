@@ -112,6 +112,8 @@ class Command extends \yii\db\Command
         $token = $rawSql;
         try {
             Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');
+            $generator->send($this->createRequest($rawSql, true));
+            $generator->send(false);
             $index = 0;
             while ($generator->valid()) {
                 $count++;

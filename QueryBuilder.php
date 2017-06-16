@@ -42,4 +42,14 @@ class QueryBuilder extends \yii\db\QueryBuilder
         }
         return $from;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function addColumn($table, $column, $type)
+    {
+        return 'ALTER TABLE ' . $this->db->quoteTableName($table)
+            . ' ADD COLUMN ' . $this->db->quoteColumnName($column) . ' '
+            . $this->getColumnType($type);
+    }
 }

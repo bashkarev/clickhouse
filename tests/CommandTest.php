@@ -7,6 +7,7 @@
 
 namespace bashkarev\clickhouse\tests;
 
+use bashkarev\clickhouse\Query;
 use yii\db\Exception;
 
 /**
@@ -77,5 +78,17 @@ class CommandTest extends DatabaseTestCase
         $command->query();
     }
 
+    public function testAddColumn()
+    {
+        $sql = $this->getConnection(false, false)->createCommand()->addColumn('user', 'dt', 'DateTime')->sql;
+        $this->assertContains('ALTER TABLE `user` ADD COLUMN `dt` DateTime', $sql);
+    }
 
+
+    public function testQueryBatchInternal()
+    {
+        $db = $this->getConnection();
+        $data = iterator_to_array((new Query())->from('customer')->each(1, $db), false);
+        $this->assertCount(3, $data);
+    }
 }

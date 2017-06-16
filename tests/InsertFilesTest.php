@@ -10,6 +10,7 @@ namespace bashkarev\clickhouse\tests;
 use yii\db\Exception;
 use bashkarev\clickhouse\FileNotFoundException;
 use bashkarev\clickhouse\InsertFiles;
+use bashkarev\clickhouse\Connection;
 use bashkarev\clickhouse\Query;
 
 /**
@@ -32,12 +33,13 @@ class InsertFilesTest extends DatabaseTestCase
 
     public function testExecute()
     {
-        $this->getInsertFiles()->setFiles([
+        $db = $this->getConnection();
+        $this->getInsertFiles($db)->setFiles([
             '@data/csv/e1e747f9901e67ca121768b36921fbae.csv',
             '@data/csv/ebe191dfc36d73aece91e92007d24e3e.csv',
             '@data/csv/empty.csv'
         ])->execute();
-        $count = (new Query)->from('csv')->count('*', $this->getConnection(false, false));
+        $count = (new Query)->from('csv')->count('*', $db);
         $this->assertContains('2000', $count);
     }
 
@@ -66,11 +68,15 @@ class InsertFilesTest extends DatabaseTestCase
     }
 
     /**
+     * @param Connection|null $db
      * @return InsertFiles
      */
-    protected function getInsertFiles()
+    protected function getInsertFiles($db = null)
     {
-        return new InsertFiles($this->getConnection(false, false), 'csv');
+        if ($db === null) {
+            $db = $this->getConnection(false, false);
+        }
+        return new InsertFiles($db, 'csv');
     }
 
 }
