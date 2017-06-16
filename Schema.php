@@ -97,7 +97,7 @@ class Schema extends \yii\db\mysql\Schema
         if (!is_string($str)) {
             return $str;
         }
-        return "'" . addcslashes(str_replace("'", "''", $str), "\000\n\r\\\032") . "'";
+        return "'" . addcslashes($str, "\000\n\r\\\032\047") . "'";
     }
 
     /**
