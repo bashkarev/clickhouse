@@ -3,7 +3,10 @@ language: php
 php:
     - 7
     - 7.1
-    - nightly
+
+env:
+  - CLICKHOUSE_VERSION=1.1.54159
+  - CLICKHOUSE_VERSION=latest
 
 services:
     - docker
@@ -13,6 +16,6 @@ install:
     - travis_retry composer install --prefer-dist --no-interaction
 
 before_script:
-    - docker run -d -p 127.0.0.1:8123:8123 --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:1.1.54159
+    - docker run -d -p 127.0.0.1:8123:8123 --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:$CLICKHOUSE_VERSION
 
 script: ./vendor/bin/phpunit

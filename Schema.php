@@ -67,7 +67,6 @@ class Schema extends \yii\db\mysql\Schema
     }
 
     /**
-     * toDo size for FixedString
      * @inheritdoc
      */
     protected function loadColumnSchema($info)
@@ -82,9 +81,21 @@ class Schema extends \yii\db\mysql\Schema
                 break 1;
             }
         }
-        if ($info['default_type'] !== '') {
+
+        if (isset($info['default_type']) && $info['default_type'] !== '') {
             $column->defaultValue = $info['default_type'];
         }
+        if (isset($info['default_kind']) && $info['default_kind'] !== '') {
+            $column->defaultValue = $info['default_kind'];
+        }
+
+        if (
+            $column->type === self::TYPE_STRING
+            && preg_match('/^FixedString\((\d+)\)$/', $column->dbType, $out)
+        ) {
+            $column->size = (int)$out[1];
+        }
+
         $column->phpType = $this->getColumnPhpType($column);
         return $column;
     }
