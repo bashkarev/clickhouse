@@ -27,14 +27,14 @@ return [
     //....
     'clickhouse' => [
         'class' => 'bashkarev\clickhouse\Connection',
-        'dsn' => 'host=localhost;port=8823;database=default;connect_timeout_with_failover_ms=10',
+        'dsn' => 'host=localhost;port=8123;database=default;connect_timeout_with_failover_ms=10',
         'username' => 'default',
-        'password' => 'default'
-    ]
+        'password' => '',
+    ],
 ];
 ```
 
-[All settings](https://clickhouse.yandex/reference_en.html#Settings)
+[All settings](https://clickhouse.yandex/docs/en/operations/settings/index.html)
 
 
 Using DebugPanel
@@ -90,7 +90,7 @@ Insert csv files
 
 > Files are uploaded in parallel.
 
-```php 
+```php
 /**
  * @var \bashkarev\clickhouse\InsertFiles $insert
  */
