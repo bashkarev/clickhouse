@@ -3,6 +3,7 @@ language: php
 php:
     - 7
     - 7.1
+    - 7.2
 
 env:
   - CLICKHOUSE_VERSION=1.1.54159
