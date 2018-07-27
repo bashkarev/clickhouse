@@ -42,6 +42,16 @@ class Connection extends \yii\db\Connection
      */
     private $_configuration;
 
+	/**
+	 * @inheritdoc
+	 */
+	public function init()
+	{
+		$this->setDriverName($this->driverName);
+
+		parent::init();
+	}
+    
     /**
      * @inheritdoc
      */
