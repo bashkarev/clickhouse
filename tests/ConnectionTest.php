@@ -59,6 +59,7 @@ class ConnectionTest extends DatabaseTestCase
     {
         $connection = $this->getConnection(false, false);
         $this->assertEquals('clickhouse', $connection->driverName);
+        $this->assertEquals('clickhouse', $connection->getDriverName());
     }
 
     public function testQuoteValue()

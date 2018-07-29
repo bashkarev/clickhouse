@@ -26,10 +26,6 @@ class Connection extends \yii\db\Connection
      */
     public $commandClass = 'bashkarev\clickhouse\Command';
     /**
-     * @inheritdoc
-     */
-    public $driverName = 'clickhouse';
-    /**
      * @var Schema
      */
     private $_schema;
@@ -42,6 +38,18 @@ class Connection extends \yii\db\Connection
      */
     private $_configuration;
 
+    /**
+     * @inheritdoc
+     */
+    public function __construct($config = [])
+    {
+        if (!isset($config['driverName'])) {
+            $config['driverName'] = 'clickhouse';
+        }
+
+        parent::__construct($config);
+    }
+    
     /**
      * @inheritdoc
      */
