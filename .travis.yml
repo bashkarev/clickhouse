@@ -1,5 +1,5 @@
 language: php
-
+sudo: required
 php:
     - 7
     - 7.1
@@ -17,6 +17,7 @@ install:
     - travis_retry composer install --prefer-dist --no-interaction
 
 before_script:
-    - docker run -d -p 127.0.0.1:8123:8123 --name some-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:$CLICKHOUSE_VERSION
+    - docker run -d -p 127.0.0.1:8123:8123 --name test-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server:$CLICKHOUSE_VERSION
+    - docker logs test-clickhouse-server
 
 script: ./vendor/bin/phpunit
