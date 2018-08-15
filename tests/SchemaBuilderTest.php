@@ -64,17 +64,19 @@ class SchemaBuilderTest extends DatabaseTestCase
         $db = $this->getConnection();
 
         $createResult = $db->createCommand()->createTable($this->tableName, [
-            'i1' => $this->smallInteger(),
-            'i2' => $this->smallInteger()->unsigned(),
-            'i3' => $this->integer(),
-            'i4' => $this->integer()->unsigned(),
-            'i5' => $this->bigInteger(),
-            'i6' => $this->bigInteger()->unsigned(),
+            'i1' => $this->tinyInteger(),
+            'i2' => $this->tinyInteger()->unsigned(),
+            'i3' => $this->smallInteger(),
+            'i4' => $this->smallInteger()->unsigned(),
+            'i5' => $this->integer(),
+            'i6' => $this->integer()->unsigned(),
+            'i7' => $this->bigInteger(),
+            'i8' => $this->bigInteger()->unsigned(),
         ], 'Engine=Memory')->execute();
 
         $this->assertEquals(1, $createResult);
 
-        $this->assertEquals(['Int16', 'UInt16', 'Int32', 'UInt32', 'Int64', 'UInt64'], $this->tableColumnsTypes());
+        $this->assertEquals(['Int8', 'UInt8', 'Int16', 'UInt16', 'Int32', 'UInt32', 'Int64', 'UInt64'], $this->tableColumnsTypes());
     }
 
     public function testFloats()
