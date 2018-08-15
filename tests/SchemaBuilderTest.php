@@ -127,11 +127,13 @@ class SchemaBuilderTest extends DatabaseTestCase
             'd2' => $this->dateTime(),
             'd3' => $this->dateTime(0),
             'd4' => $this->dateTime(6),
+            'd5' => $this->timestamp(),
+            'd6' => $this->timestamp(6)
         ], 'Engine=Memory')->execute();
 
         $this->assertEquals(1, $createResult);
 
-        $this->assertEquals(['Date', 'DateTime', 'DateTime', 'DateTime'], $this->tableColumnsTypes());
+        $this->assertEquals(['Date', 'DateTime', 'DateTime', 'DateTime', 'DateTime', 'DateTime'], $this->tableColumnsTypes());
     }
 
     public function testBoolean()
