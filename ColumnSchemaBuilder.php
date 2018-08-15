@@ -26,6 +26,9 @@ class ColumnSchemaBuilder extends AbstractColumnSchemaBuilder
         return $this;
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function buildNotNullString()
     {
         if ($this->isNotNull !== true) {
@@ -61,6 +64,9 @@ class ColumnSchemaBuilder extends AbstractColumnSchemaBuilder
         return $this->isFirst ? ' FIRST' : '';
     }
 
+    /**
+     * {@inheritdoc}
+     */
     protected function buildDefaultString()
     {
         $result = parent::buildDefaultString();
