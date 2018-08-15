@@ -118,4 +118,12 @@ class Schema extends \yii\db\mysql\Schema
     {
         return new QueryBuilder($this->db);
     }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function createColumnSchemaBuilder($type, $length = null)
+    {
+        return new ColumnSchemaBuilder($type, $length, $this->db);
+    }
 }

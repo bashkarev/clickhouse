@@ -39,7 +39,7 @@ class CommandTest extends DatabaseTestCase
         $this->assertInstanceOf(\Generator::class, $reader);
 
         // queryAll
-        $rows = $db->createCommand('SELECT * FROM {{customer}}')->queryAll();
+        $rows = $db->createCommand('SELECT * FROM {{customer}} ORDER BY [[id]]')->queryAll();
         $this->assertCount(3, $rows);
         $row = $rows[2];
         $this->assertEquals(3, $row['id']);
@@ -60,7 +60,7 @@ class CommandTest extends DatabaseTestCase
         $command = $db->createCommand($sql);
         $this->assertFalse($command->queryOne());
         // queryColumn
-        $sql = 'SELECT * FROM {{customer}}';
+        $sql = 'SELECT * FROM {{customer}} ORDER BY [[id]]';
         $column = $db->createCommand($sql)->queryColumn();
         $this->assertEquals(range(1, 3), $column);
         $command = $db->createCommand('SELECT [[id]] FROM {{customer}} WHERE [[id]] = 10');
