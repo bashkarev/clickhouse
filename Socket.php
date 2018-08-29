@@ -80,7 +80,7 @@ class Socket
 
         while (true) {
             $bytes = @fwrite($this->socket, $string);
-            if ($bytes === false) {
+            if ($bytes === false || $bytes === 0) {
                 $message = "Failed to write to socket";
                 if ($error = error_get_last()) {
                     $message .= sprintf(" Errno: %d; %s", $error["type"], $error["message"]);
