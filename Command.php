@@ -23,6 +23,12 @@ class Command extends \yii\db\Command
     {
         $rawSql = $this->getRawSql();
 
+        // Add LIMIT 1 for single result SELECT queries to save transmission bandwidth and properly reuse socket
+        if (in_array($fetchMode, ['fetch', 'fetchColumn']) && !preg_match('/LIMIT\s+\d+$/i', $rawSql)) {
+            Yii::trace('LIMIT 1 added for single result query explicitly! Try to add LIMIT 1 manually', 'bashkarev\clickhouse\Command::query');
+            $rawSql = $rawSql.' LIMIT 1';
+        }
+
         Yii::info($rawSql, 'bashkarev\clickhouse\Command::query');
         if ($method !== '') {
             $info = $this->db->getQueryCacheInfo($this->queryCacheDuration, $this->queryCacheDependency);
@@ -199,7 +205,10 @@ class Command extends \yii\db\Command
         if (!$generator->valid()) {
             return false;
         }
-        return current($generator->current());
+        $result = current($generator->current());
+        $this->readRest($generator);
+
+        return $result;
     }
 
     /**
@@ -212,7 +221,17 @@ class Command extends \yii\db\Command
         if (!$generator->valid()) {
             return false;
         }
-        return $generator->current();
+        $result = $generator->current();
+        $this->readRest($generator);
+
+        return $result;
+    }
+
+    private function readRest(\Generator $generator)
+    {
+        while ($generator->valid()) {
+            $generator->next();
+        }
     }
 
 }
