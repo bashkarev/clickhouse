@@ -8,6 +8,7 @@
 namespace bashkarev\clickhouse\tests;
 
 use bashkarev\clickhouse\Connection;
+use yii\base\InvalidConfigException;
 use yii\base\NotSupportedException;
 use yii\db\Exception;
 
@@ -38,10 +39,17 @@ class ConnectionTest extends DatabaseTestCase
 
         $connection->close();
         $this->assertFalse($connection->isActive);
+    }
+
+    public function testInvalidConfig()
+    {
+        $connection = $this->getConnection(false, false);
+
+        $this->assertFalse($connection->isActive);
 
         $connection = new Connection();
-        $connection->dsn = 'port=unknown';
-        $this->expectException(Exception::class);
+        $connection->dsn = 'port=';
+        $this->expectException(InvalidConfigException::class);
         $connection->open();
     }
 

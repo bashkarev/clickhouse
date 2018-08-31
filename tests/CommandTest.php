@@ -36,7 +36,7 @@ class CommandTest extends DatabaseTestCase
         // query
         $sql = 'SELECT * FROM {{customer}}';
         $reader = $db->createCommand($sql)->query();
-        $this->assertInstanceOf(\Generator::class, $reader);
+        $this->assertEquals(true, is_array($reader));
 
         // queryAll
         $rows = $db->createCommand('SELECT * FROM {{customer}} ORDER BY [[id]]')->queryAll();
