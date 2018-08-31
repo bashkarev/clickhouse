@@ -107,6 +107,8 @@ class Connection extends \yii\db\Connection
      */
     public function execute(string $sql)
     {
+        $this->open();
+
         return $this->_client->write($sql);
     }
 
@@ -117,6 +119,8 @@ class Connection extends \yii\db\Connection
      */
     public function executeSelect(string $sql)
     {
+        $this->open();
+
         return $this->_client->select($sql);
     }
 

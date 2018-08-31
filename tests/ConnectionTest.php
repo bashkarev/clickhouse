@@ -41,6 +41,22 @@ class ConnectionTest extends DatabaseTestCase
         $this->assertFalse($connection->isActive);
     }
 
+    public function testAutoOpen()
+    {
+        $connection = $this->getConnection(false, false);
+
+        $this->assertFalse($connection->isActive);
+
+        $connection->execute("SELECT 1");
+        $this->assertTrue($connection->isActive);
+
+        $connection->close();
+        $this->assertFalse($connection->isActive);
+
+        $connection->executeSelect("SELECT 1");
+        $this->assertTrue($connection->isActive);
+    }
+
     public function testInvalidConfig()
     {
         $connection = $this->getConnection(false, false);
