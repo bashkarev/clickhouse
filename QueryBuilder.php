@@ -31,14 +31,14 @@ class QueryBuilder extends \yii\db\QueryBuilder
         'U'.Schema::TYPE_BIGINT => 'UInt64',
         Schema::TYPE_FLOAT => 'Float32',
         Schema::TYPE_DOUBLE => 'Float64',
-        Schema::TYPE_DECIMAL => 'Float64',
+        Schema::TYPE_DECIMAL => 'Decimal(9,2)',
         Schema::TYPE_DATETIME => 'DateTime',
         Schema::TYPE_TIMESTAMP => 'DateTime',
         Schema::TYPE_TIME => 'DateTime',
         Schema::TYPE_DATE => 'Date',
         Schema::TYPE_BINARY => 'String',
         Schema::TYPE_BOOLEAN => 'UInt8',
-        Schema::TYPE_MONEY => 'Float64',
+        Schema::TYPE_MONEY => 'Decimal(18,2)',
         Schema::TYPE_JSON => 'String'
     ];
 
@@ -57,7 +57,7 @@ class QueryBuilder extends \yii\db\QueryBuilder
     public function getColumnType($type)
     {
         // Replacing NULL to Nullable() wrapper
-        return preg_replace('/^(\w+)(\(\d+\))? NULL(.*)$/i', 'Nullable(\1\2)\3', parent::getColumnType($type));
+        return preg_replace('/^(\w+)(\(\d+(?>\s*,\s*\d+)?\))? NULL(.*)$/i', 'Nullable(\1\2)\3', parent::getColumnType($type));
     }
 
     /**

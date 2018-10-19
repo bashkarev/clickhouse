@@ -41,6 +41,9 @@ class SchemaTest extends DatabaseTestCase
         $this->assertSame(Schema::TYPE_STRING, $columns['Enum8']->type);
         $this->assertSame(Schema::TYPE_STRING, $columns['Enum16']->type);
 
+        $this->assertSame(Schema::TYPE_DECIMAL, $columns['Decimal9_2']->type);
+        $this->assertSame(Schema::TYPE_DECIMAL, $columns['Decimal18_4']->type);
+        $this->assertSame(Schema::TYPE_DECIMAL, $columns['Decimal38_10']->type);
     }
 
     public function testSize()
