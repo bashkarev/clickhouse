@@ -45,14 +45,14 @@ class SchemaBuilderTest extends DatabaseTestCase
 
     private function tableColumnsTypes()
     {
-        $sql = "SELECT type FROM system.columns WHERE table = '{$this->tableName}' ORDER BY name";
+        $sql = "SELECT type FROM system.columns WHERE database = currentDatabase() AND table = '{$this->tableName}' ORDER BY name";
 
         return $this->getConnection()->createCommand($sql)->queryColumn();
     }
 
     private function tableColumnsDefaults()
     {
-        $sql = "SELECT default_kind, default_expression FROM system.columns WHERE table = '{$this->tableName}' ORDER BY name";
+        $sql = "SELECT default_kind, default_expression FROM system.columns WHERE database = currentDatabase() AND table = '{$this->tableName}' ORDER BY name";
 
         return $this->getConnection()->createCommand($sql)->queryAll();
     }
