@@ -56,14 +56,15 @@ class Connection extends \yii\db\Connection
             $config = $this->parseDsn();
 
             $this->_client = new Client([
-                'host' => $config['host']??'127.0.0.1',
-                'port' => $config['port']??8123,
+                'host' => $config['host'] ?? '127.0.0.1',
+                'port' => $config['port'] ?? 8123,
                 'username' => $this->username,
                 'password' => $this->password,
-                'settings' => array_merge([
-                    'database' => $config['database']??'default',
-                ], $this->attributes??[]),
-            ]);
+            ],
+                array_merge([
+                    'database' => $config['database'] ?? 'default',
+                ], $this->attributes ?? [])
+            );
         }
     }
 
