@@ -11,7 +11,8 @@ CREATE TABLE `customer` (
   `name` String,
   `address` String,
   `status` UInt8 DEFAULT 0,
-  `profile_id` UInt8
+  `profile_id` UInt8,
+  `external_id` UInt64 DEFAULT 0
 ) ENGINE=Memory;
 
 INSERT INTO `customer` (id, email, name, address, status, profile_id) VALUES (1,'user1@example.com', 'user1', 'address1', 1, 1);
