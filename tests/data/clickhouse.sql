@@ -34,5 +34,8 @@ CREATE TABLE `types` (
  `DateTime` DateTime,
  `Date` Date,
  `Enum8` Enum8('hello' = 1, 'world' = 2),
- `Enum16` Enum8('hello' = 1, 'world' = 2)
+ `Enum16` Enum8('hello' = 1, 'world' = 2),
+ `Decimal9_2` Decimal(9, 2),
+ `Decimal18_4` Decimal(18, 4),
+ `Decimal38_10` Decimal(38, 10)
 ) ENGINE=Memory;
