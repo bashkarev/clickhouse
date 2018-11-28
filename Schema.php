@@ -7,7 +7,6 @@
 
 namespace bashkarev\clickhouse;
 
-use yii\db\ColumnSchema;
 use yii\db\TableSchema;
 
 /**
@@ -15,6 +14,7 @@ use yii\db\TableSchema;
  */
 class Schema extends \yii\db\mysql\Schema
 {
+    public $columnSchemaClass = 'bashkarev\clickhouse\ColumnSchema';
 
     /**
      * toDo Array(T), Tuple(T1, T2, ...), Nested
@@ -75,7 +75,7 @@ class Schema extends \yii\db\mysql\Schema
      */
     protected function loadColumnSchema($info)
     {
-        $column = new ColumnSchema();
+        $column = new $this->columnSchemaClass;
         $column->name = $info['name'];
         $column->dbType = $info['type'];
 

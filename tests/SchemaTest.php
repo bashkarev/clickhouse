@@ -67,9 +67,6 @@ class SchemaTest extends DatabaseTestCase
         $this->assertFalse($columns['Int64']->unsigned);
         $this->assertFalse($columns['Float32']->unsigned);
         $this->assertFalse($columns['Float64']->unsigned);
-        $this->assertFalse($columns['Decimal9_2']->unsigned);
-        $this->assertFalse($columns['Decimal18_4']->unsigned);
-        $this->assertFalse($columns['Decimal38_10']->unsigned);
     }
 
 }
