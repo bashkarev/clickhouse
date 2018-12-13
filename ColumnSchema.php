@@ -5,7 +5,7 @@ namespace bashkarev\clickhouse;
 use yii\db\Expression;
 
 /**
- * Class ColumnSchema for MySQL database
+ * Class ColumnSchema for ClickHouse database
  *
  * @author Sartor <sartorua@gmail.com>
  */
@@ -16,7 +16,7 @@ class ColumnSchema extends \yii\db\ColumnSchema
      */
     public function dbTypecast($value)
     {
-        if ($this->unsigned && in_array($this->type, [Schema::TYPE_BIGINT, Schema::TYPE_INTEGER], true) && is_numeric($value)) {
+        if ($this->unsigned && $this->type === Schema::TYPE_BIGINT && is_numeric($value)) {
             $value = new Expression($value);
         }
 
