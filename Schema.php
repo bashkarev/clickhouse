@@ -82,7 +82,7 @@ class Schema extends \yii\db\mysql\Schema
         $column->unsigned = stripos($column->dbType, 'UInt') === 0 || stripos($column->dbType, '(UInt') !== false; // UInt64, Nullable(UInt32)
 
         foreach ($this->typeMap as $dbType => $type) {
-            if (strncasecmp($column->dbType, $dbType, strlen($dbType)) === 0) {
+            if (preg_match("/\(?$dbType\)?/", $column->dbType)) {
                 $column->type = $type;
                 break 1;
             }
