@@ -7,7 +7,9 @@
 
 namespace bashkarev\clickhouse;
 
+use ClickHouseDB\Client;
 use Yii;
+use yii\base\InvalidConfigException;
 use yii\base\NotSupportedException;
 
 /**
@@ -20,23 +22,17 @@ class Connection extends \yii\db\Connection
     /**
      * @inheritdoc
      */
-    public $schemaMap;
-    /**
-     * @inheritdoc
-     */
     public $commandClass = 'bashkarev\clickhouse\Command';
+
+    /**
+     * @var Client
+     */
+    private $_client;
+
     /**
      * @var Schema
      */
     private $_schema;
-    /**
-     * @var ConnectionPool
-     */
-    private $_pool;
-    /**
-     * @var Configuration
-     */
-    private $_configuration;
 
     /**
      * @inheritdoc
@@ -52,10 +48,48 @@ class Connection extends \yii\db\Connection
     
     /**
      * @inheritdoc
+     * @throws InvalidConfigException
      */
     public function open()
     {
-        $this->getPool()->open();
+        if ($this->_client === null) {
+            $config = $this->parseDsn();
+
+            $this->_client = new Client([
+                'host' => $config['host'] ?? '127.0.0.1',
+                'port' => $config['port'] ?? 8123,
+                'username' => $this->username,
+                'password' => $this->password,
+            ],
+                array_merge([
+                    'database' => $config['database'] ?? 'default',
+                ], $this->attributes ?? [])
+            );
+        }
+    }
+
+    /**
+     * @throws InvalidConfigException
+     */
+    private function parseDsn(): array
+    {
+        $parts = explode(';', $this->dsn);
+        $config = [];
+        foreach ($parts as $part) {
+            $paramValue = explode('=', $part);
+
+            if (empty($paramValue[0])) {
+                throw new InvalidConfigException("Invalid (empty) param name in dsn");
+            }
+
+            if (empty($paramValue[1])) {
+                throw new InvalidConfigException("Invalid (empty) param '{$paramValue[0]}' value in dsn");
+            }
+
+            $config[$paramValue[0]] = $paramValue[1];
+        }
+
+        return $config;
     }
 
     /**
@@ -63,31 +97,37 @@ class Connection extends \yii\db\Connection
      */
     public function close()
     {
-        if ($this->_pool !== null) {
-            $this->_pool->close();
+        if ($this->_client !== null) {
+            $this->_client = null;
         }
     }
 
     /**
-     * @return \Generator
+     * @param string $sql
+     * @return \ClickHouseDB\Statement
      */
-    public function execute()
+    public function execute(string $sql)
     {
-        $socket = $this->getPool()->open();
-        $socket->lock();
-        while (true) {
-            $data = yield;
-            if ($data === false) {
-                break 1;
-            }
-            $socket->write($data);
-        }
-        yield from (new Parser())->run($socket->getNative());
-        $socket->unlock();
+        $this->open();
+
+        return $this->_client->write($sql);
+    }
+
+    /**
+     * @param string $sql
+     * @return \ClickHouseDB\Statement
+     * @throws \Exception
+     */
+    public function executeSelect(string $sql)
+    {
+        $this->open();
+
+        return $this->_client->select($sql);
     }
 
     /**
      * @return Schema
+     * @throws InvalidConfigException
      */
     public function getSchema()
     {
@@ -101,33 +141,11 @@ class Connection extends \yii\db\Connection
     }
 
     /**
-     * @return ConnectionPool
-     */
-    public function getPool()
-    {
-        if ($this->_pool === null) {
-            $this->_pool = new ConnectionPool($this);
-        }
-        return $this->_pool;
-    }
-
-    /**
-     * @return Configuration
-     */
-    public function getConfiguration()
-    {
-        if ($this->_configuration === null) {
-            $this->_configuration = new Configuration($this->dsn, $this->username, $this->password);
-        }
-        return $this->_configuration;
-    }
-
-    /**
      * @inheritdoc
      */
     public function getIsActive()
     {
-        return ($this->_pool !== null && $this->_pool->total() !== 0);
+        return ($this->_client !== null);
     }
 
     /**

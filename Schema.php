@@ -7,7 +7,6 @@
 
 namespace bashkarev\clickhouse;
 
-use yii\db\ColumnSchema;
 use yii\db\TableSchema;
 
 /**
@@ -15,6 +14,7 @@ use yii\db\TableSchema;
  */
 class Schema extends \yii\db\mysql\Schema
 {
+    public $columnSchemaClass = 'bashkarev\clickhouse\ColumnSchema';
 
     /**
      * toDo Array(T), Tuple(T1, T2, ...), Nested
@@ -36,7 +36,11 @@ class Schema extends \yii\db\mysql\Schema
         'DateTime' => self::TYPE_DATETIME,
         'Date' => self::TYPE_DATE,
         'Enum8' => self::TYPE_STRING,
-        'Enum16' => self::TYPE_STRING
+        'Enum16' => self::TYPE_STRING,
+        'Decimal' => self::TYPE_DECIMAL,
+        'Decimal32' => self::TYPE_DECIMAL,
+        'Decimal64' => self::TYPE_DECIMAL,
+        'Decimal128' => self::TYPE_DECIMAL,
     ];
 
     /**
@@ -55,7 +59,7 @@ class Schema extends \yii\db\mysql\Schema
      */
     protected function findColumns($table)
     {
-        $columns = $this->db->createCommand('SELECT * FROM system.columns WHERE table=:name', [':name' => $table->name])->queryAll();
+        $columns = $this->db->createCommand('SELECT * FROM system.columns WHERE database = currentDatabase() AND table = :name', [':name' => $table->name])->queryAll();
         if ($columns === []) {
             return false;
         }
@@ -71,12 +75,14 @@ class Schema extends \yii\db\mysql\Schema
      */
     protected function loadColumnSchema($info)
     {
-        $column = new ColumnSchema();
+        $column = new $this->columnSchemaClass;
         $column->name = $info['name'];
         $column->dbType = $info['type'];
 
+        $column->unsigned = stripos($column->dbType, 'UInt') === 0 || stripos($column->dbType, '(UInt') !== false; // UInt64, Nullable(UInt32)
+
         foreach ($this->typeMap as $dbType => $type) {
-            if (strncasecmp($column->dbType, $dbType, strlen($dbType)) === 0) {
+            if (preg_match("/\(?$dbType\)?/", $column->dbType)) {
                 $column->type = $type;
                 break 1;
             }

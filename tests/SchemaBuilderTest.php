@@ -45,14 +45,14 @@ class SchemaBuilderTest extends DatabaseTestCase
 
     private function tableColumnsTypes()
     {
-        $sql = "SELECT type FROM system.columns WHERE table = '{$this->tableName}' ORDER BY name";
+        $sql = "SELECT type FROM system.columns WHERE database = currentDatabase() AND table = '{$this->tableName}' ORDER BY name";
 
         return $this->getConnection()->createCommand($sql)->queryColumn();
     }
 
     private function tableColumnsDefaults()
     {
-        $sql = "SELECT default_kind, default_expression FROM system.columns WHERE table = '{$this->tableName}' ORDER BY name";
+        $sql = "SELECT default_kind, default_expression FROM system.columns WHERE database = currentDatabase() AND table = '{$this->tableName}' ORDER BY name";
 
         return $this->getConnection()->createCommand($sql)->queryAll();
     }
@@ -158,16 +158,25 @@ class SchemaBuilderTest extends DatabaseTestCase
         $db = $this->getConnection();
 
         $createResult = $db->createCommand()->createTable($this->tableName, [
-            'f1' => $this->decimal(),
-            'f2' => $this->decimal(10, 4),
-            'f3' => $this->money(),
-            'f4' => $this->money(10, 4),
+            'f1' => $this->decimal(9, 0),
+            'f2' => $this->decimal(9, 2),
+            'f3' => $this->decimal(9, 9),
+            'f4' => $this->decimal(38, 2),
 
+            'f5' => $this->money(9, 2),
+            'f6' => $this->money(38, 6),
+
+            'f7' => $this->decimal(),
+            'f8' => $this->money(),
         ], 'Engine=Memory')->execute();
 
         $this->assertEquals(1, $createResult);
 
-        $this->assertEquals(['Float64', 'Float64', 'Float64', 'Float64'], $this->tableColumnsTypes());
+        $this->assertEquals([
+            'Decimal(9, 0)', 'Decimal(9, 2)', 'Decimal(9, 9)', 'Decimal(38, 2)',
+            'Decimal(9, 2)', 'Decimal(38, 6)',
+            'Decimal(9, 2)', 'Decimal(18, 2)'
+        ], $this->tableColumnsTypes());
     }
 
     public function testNullable()
@@ -195,7 +204,7 @@ class SchemaBuilderTest extends DatabaseTestCase
         $expected = [
             'Nullable(Int32)', 'Nullable(UInt32)', 'Nullable(Float32)', 'Nullable(Float64)',
             'Nullable(String)', 'Nullable(UInt8)', 'Nullable(Date)', 'Nullable(DateTime)',
-            'Nullable(Float64)', 'Nullable(Float64)', 'Nullable(FixedString(100))'
+            'Nullable(Decimal(9, 2))', 'Nullable(Decimal(18, 2))', 'Nullable(FixedString(100))'
         ];
 
         $this->assertEquals($expected, $this->tableColumnsTypes());

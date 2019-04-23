@@ -1,8 +1,0 @@
-HTTP/1.1 200 OK
-Date: Thu, 11 May 2017 15:49:00 GMT
-Connection: Keep-Alive
-Content-Type: text/plain; charset=UTF-8
-Transfer-Encoding: chunked
-Keep-Alive: timeout=3
-
-0

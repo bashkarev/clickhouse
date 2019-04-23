@@ -11,7 +11,8 @@ CREATE TABLE `customer` (
   `name` String,
   `address` String,
   `status` UInt8 DEFAULT 0,
-  `profile_id` UInt8
+  `profile_id` UInt8,
+  `external_id` UInt64 DEFAULT 0
 ) ENGINE=Memory;
 
 INSERT INTO `customer` (id, email, name, address, status, profile_id) VALUES (1,'user1@example.com', 'user1', 'address1', 1, 1);
@@ -34,5 +35,8 @@ CREATE TABLE `types` (
  `DateTime` DateTime,
  `Date` Date,
  `Enum8` Enum8('hello' = 1, 'world' = 2),
- `Enum16` Enum8('hello' = 1, 'world' = 2)
+ `Enum16` Enum8('hello' = 1, 'world' = 2),
+ `Decimal9_2` Decimal(9, 2),
+ `Decimal18_4` Decimal(18, 4),
+ `Decimal38_10` Decimal(38, 10)
 ) ENGINE=Memory;

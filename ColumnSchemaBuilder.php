@@ -85,7 +85,7 @@ class ColumnSchemaBuilder extends AbstractColumnSchemaBuilder
     {
         switch ($this->getTypeCategory()) {
             case self::CATEGORY_NUMERIC:
-                $format = "{unsigned}{type}{notnull}{default}{append}{pos}";
+                $format = "{unsigned}{type}{length}{notnull}{default}{append}{pos}";
                 break;
             default:
                 $format = "{type}{length}{notnull}{default}{check}{append}{pos}";
