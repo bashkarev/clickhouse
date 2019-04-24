@@ -36,7 +36,11 @@ class Schema extends \yii\db\mysql\Schema
         'DateTime' => self::TYPE_DATETIME,
         'Date' => self::TYPE_DATE,
         'Enum8' => self::TYPE_STRING,
-        'Enum16' => self::TYPE_STRING
+        'Enum16' => self::TYPE_STRING,
+        'Decimal' => self::TYPE_DECIMAL,
+        'Decimal32' => self::TYPE_DECIMAL,
+        'Decimal64' => self::TYPE_DECIMAL,
+        'Decimal128' => self::TYPE_DECIMAL,
     ];
 
     /**
