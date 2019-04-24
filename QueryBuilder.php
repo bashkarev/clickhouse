@@ -7,6 +7,7 @@
 
 namespace bashkarev\clickhouse;
 
+use yii\db\ArrayExpression;
 use yii\db\Exception;
 
 /**
@@ -41,6 +42,13 @@ class QueryBuilder extends \yii\db\QueryBuilder
         Schema::TYPE_MONEY => 'Decimal(18,2)',
         Schema::TYPE_JSON => 'String'
     ];
+
+    protected function defaultExpressionBuilders()
+    {
+        return array_merge(parent::defaultExpressionBuilders(), [
+            ArrayExpression::class => ArrayExpressionBuilder::class,
+        ]);
+    }
 
     /**
      * @inheritdoc
