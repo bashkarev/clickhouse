@@ -59,7 +59,7 @@ class Schema extends \yii\db\mysql\Schema
      */
     protected function findColumns($table)
     {
-        $columns = $this->db->createCommand('SELECT * FROM system.columns WHERE table=:name', [':name' => $table->name])->queryAll();
+        $columns = $this->db->createCommand('SELECT * FROM system.columns WHERE database = currentDatabase() AND table = :name', [':name' => $table->name])->queryAll();
         if ($columns === []) {
             return false;
         }
