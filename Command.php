@@ -90,7 +90,6 @@ class Command extends \yii\db\Command
             Yii::beginProfile($token, __METHOD__);
             $statement = $this->db->execute($rawSql);
             $this->refreshTableSchema();
-            print_r($statement->statistics());
             return (int)(!$statement->isError());
         } catch (DatabaseException $e) {
             Yii::endProfile($token, __METHOD__);
