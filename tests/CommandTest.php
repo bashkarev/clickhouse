@@ -25,6 +25,19 @@ class CommandTest extends DatabaseTestCase
         $sql = 'SELECT COUNT(*) FROM {{customer}} WHERE [[name]] = \'user4\'';
         $command = $db->createCommand($sql);
         $this->assertEquals(1, $command->queryScalar());
+
+        $this->assertEquals(1, $db->createCommand()->insert('{{customer}}', [
+            'id' => 5,
+            'email' => 'user5@mail.com',
+            'name' => 'User5',
+            'address' => 'address5',
+            'external_id' => '11370182377183229600',
+        ])->execute());
+
+        $externalId = $db->createCommand('SELECT external_id FROM {{customer}} WHERE [[id]] = 5')->queryScalar();
+        $this->assertSame('11370182377183229600', $externalId);
+        $this->assertNotSame(11370182377183229600, $externalId);
+
         $command = $db->createCommand('bad SQL');
         $this->expectException(Exception::class);
         $command->execute();

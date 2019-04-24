@@ -52,4 +52,21 @@ class SchemaTest extends DatabaseTestCase
         $this->assertSame(20, $column->size);
     }
 
+    public function testUnsigned()
+    {
+        $columns = $this->getConnection()->getSchema()->getTableSchema('types', true)->columns;
+
+        $this->assertTrue($columns['UInt8']->unsigned);
+        $this->assertTrue($columns['UInt16']->unsigned);
+        $this->assertTrue($columns['UInt32']->unsigned);
+        $this->assertTrue($columns['UInt64']->unsigned);
+
+        $this->assertFalse($columns['Int8']->unsigned);
+        $this->assertFalse($columns['Int16']->unsigned);
+        $this->assertFalse($columns['Int32']->unsigned);
+        $this->assertFalse($columns['Int64']->unsigned);
+        $this->assertFalse($columns['Float32']->unsigned);
+        $this->assertFalse($columns['Float64']->unsigned);
+    }
+
 }
