@@ -104,4 +104,23 @@ class CommandTest extends DatabaseTestCase
         $data = iterator_to_array((new Query())->from('customer')->each(1, $db), false);
         $this->assertCount(3, $data);
     }
+
+    // todo nested
+    public function testArrays()
+    {
+        $db = $this->getConnection();
+
+        $dataForInsert = [
+            'Array_UInt8' => [5],
+            'Array_Float64' => [5.5],
+            'Array_String' => ['asdasd'],
+            'Array_DateTime' => [date('Y-m-d H:i:s')]
+        ];
+
+        $this->assertEquals(1, $db->createCommand()->insert('{{arrays}}', $dataForInsert)->execute());
+
+        $dataFromSelect = $db->createCommand('SELECT * FROM {{arrays}}')->queryOne();
+
+        $this->assertEquals($dataForInsert, $dataFromSelect);
+    }
 }
