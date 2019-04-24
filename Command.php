@@ -7,7 +7,10 @@
 
 namespace bashkarev\clickhouse;
 
+use ClickHouseDB\Exception\DatabaseException;
+use ClickHouseDB\Statement;
 use Yii;
+use yii\db\Exception;
 
 /**
  * @property Connection $db
@@ -22,12 +25,6 @@ class Command extends \yii\db\Command
     protected function queryInternal($method, $fetchMode = null)
     {
         $rawSql = $this->getRawSql();
-
-        // Add LIMIT 1 for single result SELECT queries to save transmission bandwidth and properly reuse socket
-        if (in_array($fetchMode, ['fetch', 'fetchColumn']) && !preg_match('/LIMIT\s+\d+$/i', $rawSql)) {
-            Yii::trace('LIMIT 1 added for single result query explicitly! Try to add LIMIT 1 manually', 'bashkarev\clickhouse\Command::query');
-            $rawSql = $rawSql.' LIMIT 1';
-        }
 
         Yii::info($rawSql, 'bashkarev\clickhouse\Command::query');
         if ($method !== '') {
@@ -50,17 +47,19 @@ class Command extends \yii\db\Command
                 }
             }
         }
-        $generator = $this->db->execute();
+
         $token = $rawSql;
         try {
             Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');
-            $generator->send($this->createRequest($rawSql, true));
-            $generator->send(false);
+            $statement = $this->db->executeSelect($rawSql);
             if ($method === '') {
-                return $generator;
+                return $statement->rows();
             }
-            $result = call_user_func_array([$this, $method], [$generator, $fetchMode]);
+            $result = call_user_func_array([$this, $method], [$statement, $fetchMode]);
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
+        } catch (DatabaseException $e) {
+            Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
+            throw new Exception($e->getMessage());
         } catch (\Exception $e) {
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
             throw $e;
@@ -85,18 +84,16 @@ class Command extends \yii\db\Command
         if ($this->sql == '') {
             return 0;
         }
-        $generator = $this->db->execute();
+
         $token = $rawSql;
         try {
             Yii::beginProfile($token, __METHOD__);
-            $generator->send($this->createRequest($rawSql, false));
-            $generator->send(false);
-            while ($generator->valid()) {
-                $generator->next();
-            }
-            Yii::endProfile($token, __METHOD__);
+            $statement = $this->db->execute($rawSql);
             $this->refreshTableSchema();
-            return 1;
+            return (int)(!$statement->isError());
+        } catch (DatabaseException $e) {
+            Yii::endProfile($token, __METHOD__);
+            throw new Exception($e->getMessage());
         } catch (\Exception $e) {
             Yii::endProfile($token, __METHOD__);
             throw $e;
@@ -110,128 +107,79 @@ class Command extends \yii\db\Command
      */
     public function queryBatchInternal($size)
     {
-        $rawSql = $this->getRawSql();
+        // TODO: real batch select
+        $allRows = $this->queryAll();
+
         $count = 0;
+        $index = 0;
         $rows = [];
-        Yii::info($rawSql, 'bashkarev\clickhouse\Command::query');
-        $generator = $this->db->execute();
-        $token = $rawSql;
-        try {
-            Yii::beginProfile($token, 'bashkarev\clickhouse\Command::query');
-            $generator->send($this->createRequest($rawSql, true));
-            $generator->send(false);
-            $index = 0;
-            while ($generator->valid()) {
-                $count++;
-                $rows[$index] = $generator->current();
-                if ($count >= $size) {
-                    yield $rows;
-                    $rows = [];
-                    $count = 0;
-                }
-                ++$index;
-                $generator->next();
-            }
-            if ($rows !== []) {
+        foreach ($allRows as $row) {
+            $count++;
+            $rows[$index] = $row;
+            if ($count >= $size) {
                 yield $rows;
+                $rows = [];
+                $count = 0;
             }
-            Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
-        } catch (\Exception $e) {
-            Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
-            throw $e;
+            $index++;
+        }
+
+        if ($rows !== []) {
+            yield $rows;
         }
     }
 
     /**
-     * @param string $table
-     * @param array $files
-     * @param array $columns
-     * @return InsertFiles
-     */
-    public function batchInsertFiles($table, $files = [], $columns = [])
-    {
-        return new InsertFiles($this->db, $table, $files, $columns);
-    }
-
-    /**
-     * @param string $sql
-     * @param bool $forRead
-     * @return string
-     */
-    protected function createRequest($sql, $forRead)
-    {
-        $data = $sql;
-        $url = $this->db->getConfiguration()->prepareUrl();
-        if ($forRead === true) {
-            $data .= ' FORMAT JSONEachRow';
-        }
-        $header = "POST $url HTTP/1.1\r\n";
-        $header .= "Content-Length: " . strlen($data) . "\r\n";
-        $header .= "\r\n";
-        $header .= $data;
-
-        return $header;
-    }
-
-    /**
-     * @param \Generator $generator
+     * @param \ClickHouseDB\Statement $statement
      * @param int $mode
      * @return array
      */
-    protected function fetchAll(\Generator $generator, $mode)
+    protected function fetchAll(Statement $statement, $mode)
     {
-        $result = [];
-        if ($mode === \PDO::FETCH_COLUMN) {
-            while ($generator->valid()) {
-                $result[] = current($generator->current());
-                $generator->next();
-            }
-        } else {
-            while ($generator->valid()) {
-                $result[] = $generator->current();
-                $generator->next();
-            }
+        $result = $statement->rows();
+
+        if ($result === null) {
+            return [];
         }
-        return $result;
+
+        if ($mode !== \PDO::FETCH_COLUMN) {
+            return $result;
+        }
+
+        $firstRow = current($result);
+        if ($firstRow === false) {
+            return [];
+        }
+
+        $firstKey = current(array_keys($firstRow));
+
+        return array_column($result, $firstKey);
+
     }
 
     /**
-     * @param \Generator $generator
+     * @param \ClickHouseDB\Statement $statement
      * @param $mode
      * @return bool|mixed
      */
-    protected function fetchColumn(\Generator $generator, $mode)
+    protected function fetchColumn(Statement $statement, $mode)
     {
-        if (!$generator->valid()) {
+        $row = $statement->fetchOne();
+
+        if ($row === null) {
             return false;
         }
-        $result = current($generator->current());
-        $this->readRest($generator);
 
-        return $result;
+        return current($row);
     }
 
     /**
-     * @param \Generator $generator
+     * @param \ClickHouseDB\Statement $statement
      * @param $mode
      * @return bool|mixed
      */
-    protected function fetch(\Generator $generator, $mode)
+    protected function fetch(Statement $statement, $mode)
     {
-        if (!$generator->valid()) {
-            return false;
-        }
-        $result = $generator->current();
-        $this->readRest($generator);
-
-        return $result;
+        return $statement->fetchOne()??false;
     }
-
-    private function readRest(\Generator $generator)
-    {
-        while ($generator->valid()) {
-            $generator->next();
-        }
-    }
-
 }
