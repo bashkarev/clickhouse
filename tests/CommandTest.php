@@ -49,7 +49,7 @@ class CommandTest extends DatabaseTestCase
         // query
         $sql = 'SELECT * FROM {{customer}}';
         $reader = $db->createCommand($sql)->query();
-        $this->assertInstanceOf(\Generator::class, $reader);
+        $this->assertEquals(true, is_array($reader));
 
         // queryAll
         $rows = $db->createCommand('SELECT * FROM {{customer}} ORDER BY [[id]]')->queryAll();
@@ -103,5 +103,26 @@ class CommandTest extends DatabaseTestCase
         $db = $this->getConnection();
         $data = iterator_to_array((new Query())->from('customer')->each(1, $db), false);
         $this->assertCount(3, $data);
+    }
+
+    // todo nested
+    public function testArrays()
+    {
+        $db = $this->getConnection();
+
+        $dataForInsert = [
+            'Array_UInt8' => [5],
+            'Array_Float64' => [5.5],
+            'Array_String' => ['asdasd'],
+            'Array_DateTime' => [date('Y-m-d H:i:s')],
+            'Array_Nullable_Decimal' => [null, null],
+            'Array_FixedString_empty' => [],
+        ];
+
+        $this->assertEquals(1, $db->createCommand()->insert('{{arrays}}', $dataForInsert)->execute());
+
+        $dataFromSelect = $db->createCommand('SELECT * FROM {{arrays}}')->queryOne();
+
+        $this->assertEquals($dataForInsert, $dataFromSelect);
     }
 }

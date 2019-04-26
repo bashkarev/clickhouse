@@ -1,6 +1,7 @@
 DROP TABLE IF EXISTS `csv`;
 DROP TABLE IF EXISTS `customer`;
 DROP TABLE IF EXISTS `types`;
+DROP TABLE IF EXISTS `arrays`;
 
 
 CREATE TABLE csv (d Date, a String, b String) ENGINE = MergeTree(d, d, 8192);
@@ -40,3 +41,12 @@ CREATE TABLE `types` (
  `Decimal18_4` Decimal(18, 4),
  `Decimal38_10` Decimal(38, 10)
 ) ENGINE=Memory;
+
+ CREATE TABLE `arrays` (
+  `Array_UInt8` Array(UInt8),
+  `Array_Float64` Array(Float64),
+  `Array_String` Array(String),
+  `Array_DateTime` Array(DateTime),
+  `Array_Nullable_Decimal` Array(Nullable(Decimal32(4))),
+  `Array_FixedString_empty` Array(FixedString(2))
+ ) ENGINE=Memory;

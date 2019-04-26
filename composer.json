@@ -5,8 +5,9 @@
     "type": "yii2-extension",
     "license": "MIT",
     "require": {
-        "php": ">=7.0",
-        "yiisoft/yii2": "~2.0.13"
+        "php": "^7.1",
+        "yiisoft/yii2": "~2.0.13",
+        "smi2/phpclickhouse": "^1.3.3"
     },
     "require-dev": {
         "phpunit/phpunit": "~5.7"
@@ -20,6 +21,10 @@
         {
             "name": "bashkarev",
             "email": "dmitry@bashkarev.com"
+        },
+        {
+            "name": "sartor",
+            "email": "sartorua@gmail.com"
         }
     ],
     "repositories": [
