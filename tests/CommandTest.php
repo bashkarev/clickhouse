@@ -114,7 +114,9 @@ class CommandTest extends DatabaseTestCase
             'Array_UInt8' => [5],
             'Array_Float64' => [5.5],
             'Array_String' => ['asdasd'],
-            'Array_DateTime' => [date('Y-m-d H:i:s')]
+            'Array_DateTime' => [date('Y-m-d H:i:s')],
+            'Array_Nullable_Decimal' => [null, null],
+            'Array_FixedString_empty' => [],
         ];
 
         $this->assertEquals(1, $db->createCommand()->insert('{{arrays}}', $dataForInsert)->execute());
