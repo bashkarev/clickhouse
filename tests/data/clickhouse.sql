@@ -46,5 +46,7 @@ CREATE TABLE `types` (
   `Array_UInt8` Array(UInt8),
   `Array_Float64` Array(Float64),
   `Array_String` Array(String),
-  `Array_DateTime` Array(DateTime)
+  `Array_DateTime` Array(DateTime),
+  `Array_Nullable_Decimal` Array(Nullable(Decimal32(4))),
+  `Array_FixedString_empty` Array(FixedString(2))
  ) ENGINE=Memory;
