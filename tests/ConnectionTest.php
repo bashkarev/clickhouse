@@ -8,9 +8,10 @@
 namespace bashkarev\clickhouse\tests;
 
 use bashkarev\clickhouse\Connection;
+use bashkarev\clickhouse\Query;
+use ClickHouseDB\Statement;
 use yii\base\InvalidConfigException;
 use yii\base\NotSupportedException;
-use yii\db\Exception;
 
 /**
  * @author Dmitry Bashkarev <dmitry@bashkarev.com>
@@ -143,5 +144,29 @@ class ConnectionTest extends DatabaseTestCase
     {
         $this->expectException(NotSupportedException::class);
         $this->getConnection()->beginTransaction();
+    }
+
+    public function testBatchInsert()
+    {
+        $connection = $this->getConnection();
+        $client = $connection->getClient();
+
+        $files = [
+            \Yii::getAlias('@data/csv/e1e747f9901e67ca121768b36921fbae.csv'),
+            \Yii::getAlias('@data/csv/ebe191dfc36d73aece91e92007d24e3e.csv'),
+            \Yii::getAlias('@data/csv/empty.csv'),
+        ];
+
+        $result = $client->insertBatchFiles('csv', $files);
+        $count = (new Query)
+            ->from('csv')
+            ->count('*', $connection);
+
+        foreach ($result as $filename => $state) {
+            /** @var Statement $state */
+            $this->assertEquals($state->isError(), false);
+        }
+
+        $this->assertContains('2000', $count);
     }
 }

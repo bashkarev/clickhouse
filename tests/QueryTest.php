@@ -117,22 +117,27 @@ class QueryTest extends DatabaseTestCase
     public function testUnionAll()
     {
         $db = $this->getConnection();
-        $secondQuery = (new Query())
+        $query1 = (new Query())
             ->select('name')
             ->from('{{customer}}')
             ->where([
                 'id' => [1]
             ]);
 
-        $rows = (new Query())
+        $query2 = (new Query())
             ->select('name')
             ->from('{{customer}}')
             ->where([
                 'id' => [2]
-            ])
-            ->union($secondQuery, true)
+            ]);
+
+        $rows = (new Query())
+            ->select('name')
+            ->from(['result' => $query1->union($query2, true)])
             ->orderBy(['name' => SORT_ASC])
             ->all($db);
+
+        // Using Subquery, because of ClickHouse does not sort result
 
         $this->assertEquals([
             ['name' => 'user1'],

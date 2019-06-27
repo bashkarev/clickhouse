@@ -7,7 +7,7 @@
 
 namespace bashkarev\clickhouse;
 
-use ClickHouseDB\Exception\DatabaseException;
+use ClickHouseDB\Exception\QueryException;
 use ClickHouseDB\Statement;
 use Yii;
 use yii\db\Exception;
@@ -57,7 +57,7 @@ class Command extends \yii\db\Command
             }
             $result = call_user_func_array([$this, $method], [$statement, $fetchMode]);
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
-        } catch (DatabaseException $e) {
+        } catch (QueryException $e) {
             Yii::endProfile($token, 'bashkarev\clickhouse\Command::query');
             throw new Exception($e->getMessage());
         } catch (\Exception $e) {
@@ -91,7 +91,7 @@ class Command extends \yii\db\Command
             $statement = $this->db->execute($rawSql);
             $this->refreshTableSchema();
             return (int)(!$statement->isError());
-        } catch (DatabaseException $e) {
+        } catch (QueryException $e) {
             Yii::endProfile($token, __METHOD__);
             throw new Exception($e->getMessage());
         } catch (\Exception $e) {

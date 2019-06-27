@@ -148,6 +148,11 @@ class Connection extends \yii\db\Connection
         return ($this->_client !== null);
     }
 
+    public function getClient(): Client
+    {
+        return $this->_client;
+    }
+
     /**
      * @inheritdoc
      * @throws NotSupportedException
