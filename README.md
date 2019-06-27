@@ -2,6 +2,15 @@ Extension ClickHouse for Yii 2
 ==============================
 
 This extension provides the [ClickHouse](https://clickhouse.yandex/) integration for the [Yii framework 2.0](http://www.yiiframework.com).
+Main features:
+- SQL commands
+- Query builder
+- Schema builder
+- Migrations
+- Batch Insert
+- Parallel insert from large CSV files
+- Valid handling of UInt64 type in PHP
+- Supports Decimals and Nullable fields
 
 [![Build Status](https://travis-ci.org/bashkarev/clickhouse.svg?branch=master)](https://travis-ci.org/bashkarev/clickhouse)
 
@@ -84,6 +93,11 @@ yii clickhouse-migrate
 # reverts the last applied migration
 yii clickhouse-migrate/down
 ```
+Access to native SMI2 ClickHouse client
+---------------------------------------
+```php
+$client = \Yii::$app->clickhouse->getClient();
+```
 
 Insert csv files
 ----------------
@@ -91,16 +105,15 @@ Insert csv files
 > Files are uploaded in parallel.
 
 ```php
-/**
- * @var \bashkarev\clickhouse\InsertFiles $insert
- */
-$insert = Yii::$app->clickhouse->createCommand()->batchInsertFiles('csv',[
-    '@vendor/bashkarev/clickhouse/tests/data/csv/e1e747f9901e67ca121768b36921fbae.csv',
-    '@vendor/bashkarev/clickhouse/tests/data/csv/ebe191dfc36d73aece91e92007d24e3e.csv',
-]);
-$insert
-    ->setFiles(fopen('/csv/ebe191dfc36d73aece91e92007d24e3e.csv','rb'))
-    ->setChunkSize(8192) // default 4096 bytes
-    ->execute();
+$db = \Yii::$app->clickhouse;
+$client = $db->getClient();
+
+$results = $client->insertBatchFiles('table_name', ['file_with_data.csv']);
+
+$state = $results['file_with_data.csv'];
+$isSuccess = !$state->isError();
+$uploadInfo = $state->responseInfo();
+
+print_r($uploadInfo);
 ```
 
