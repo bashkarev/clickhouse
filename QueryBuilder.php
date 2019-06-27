@@ -94,4 +94,24 @@ class QueryBuilder extends \yii\db\QueryBuilder
             . ' ADD COLUMN ' . $this->db->quoteColumnName($column) . ' '
             . $this->getColumnType($type);
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function buildLimit($limit, $offset)
+    {
+        $sql = '';
+
+        if (!$this->hasLimit($limit) && $this->hasOffset($offset)) {
+            throw new Exception('Specify LIMIT value');
+        }
+
+        if ($this->hasOffset($offset)) {
+            $sql = 'LIMIT ' . $offset . ', ' . $limit;
+        } elseif ($this->hasLimit($limit)) {
+            $sql = 'LIMIT ' . $limit;
+        }
+
+        return ltrim($sql);
+    }
 }
