@@ -150,6 +150,8 @@ class Connection extends \yii\db\Connection
 
     public function getClient(): Client
     {
+        $this->open();
+        
         return $this->_client;
     }
 
