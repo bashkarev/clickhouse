@@ -12,7 +12,7 @@ Main features:
 - Valid handling of UInt64 type in PHP
 - Supports Decimals and Nullable fields
 
-[![Build Status](https://travis-ci.org/bashkarev/clickhouse.svg?branch=master)](https://travis-ci.org/bashkarev/clickhouse)
+[![Build Status](https://travis-ci.org/informex/clickhouse.svg?branch=master)](https://travis-ci.org/informex/clickhouse)
 
 Installation
 ------------
