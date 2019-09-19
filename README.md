@@ -22,7 +22,7 @@ The preferred way to install this extension is through [composer](http://getcomp
 Either run
 
 ```
-composer require bashkarev/clickhouse
+composer require olexainf/clickhouse
 ```
 
 
@@ -35,7 +35,7 @@ To use this extension, simply add the following code in your application configu
 return [
     //....
     'clickhouse' => [
-        'class' => 'bashkarev\clickhouse\Connection',
+        'class' => 'olexainf\clickhouse\Connection',
         'dsn' => 'host=localhost;port=8123;database=default;connect_timeout_with_failover_ms=10',
         'username' => 'default',
         'password' => '',
@@ -60,7 +60,7 @@ enabled, it is sufficient to just add the panels configuration):
             'class' => 'yii\\debug\\Module',
             'panels' => [
                 'clickhouse' => [
-                    'class' => 'bashkarev\clickhouse\debug\Panel',
+                    'class' => 'olexainf\clickhouse\debug\Panel',
                     // 'db' => 'clickhouse', // ClickHouse component ID, defaults to `db`. Uncomment and change this line, if you registered component with a different ID.
                 ],
             ],
@@ -78,7 +78,7 @@ In order to enable this command you should adjust the configuration of your cons
 return [
     // ...
     'controllerMap' => [
-        'clickhouse-migrate' => 'bashkarev\clickhouse\console\controllers\MigrateController'
+        'clickhouse-migrate' => 'olexainf\clickhouse\console\controllers\MigrateController'
     ],
 ];
 ```
