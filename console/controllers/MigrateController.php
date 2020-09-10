@@ -122,12 +122,7 @@ class MigrateController extends \yii\console\controllers\MigrateController
      */
     protected function addMigrationHistory($version)
     {
-        $command = $this->db->createCommand();
-        $command->insert($this->migrationTable, [
-            'version' => $version,
-            'apply_time' => time(),
-            'is_deleted' => 0
-        ])->execute();
+        $this->insertHistory($version);
     }
 
     /**
@@ -135,12 +130,17 @@ class MigrateController extends \yii\console\controllers\MigrateController
      */
     protected function removeMigrationHistory($version)
     {
-        $command = $this->db->createCommand();
-        $command->insert($this->migrationTable, [
-            'version' => $version,
-            'apply_time' => time(),
-            'is_deleted' => 1
-        ])->execute();
+        $this->insertHistory($version, true);
     }
 
+    private function insertHistory(string $version, bool $isDelete = false): void
+    {
+        $time = time();
+        $this->db->createCommand()->insert($this->migrationTable, [
+            'version' => $version,
+            'date' => date('Y-m-d', $time),
+            'apply_time' => $time,
+            'is_deleted' => (int) $isDelete
+        ])->execute();
+    }
 }
