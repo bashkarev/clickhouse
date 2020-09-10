@@ -229,9 +229,9 @@ class SchemaBuilderTest extends DatabaseTestCase
         $this->assertEquals(1, $createResult);
 
         $expected = [
-            ['default_kind' => 'DEFAULT', 'default_expression' => "CAST(100, 'Int32')"],
-            ['default_kind' => 'DEFAULT', 'default_expression' => "CAST(100, 'Nullable(UInt32)')"],
-            ['default_kind' => 'DEFAULT', 'default_expression' => "CAST('qweasdzxc1', 'Nullable(FixedString(10))')"],
+            ['default_kind' => 'DEFAULT', 'default_expression' => "100"],
+            ['default_kind' => 'DEFAULT', 'default_expression' => "100"],
+            ['default_kind' => 'DEFAULT', 'default_expression' => "'qweasdzxc1'"],
             ['default_kind' => 'DEFAULT', 'default_expression' => "'str1'"],
             ['default_kind' => 'DEFAULT', 'default_expression' => "concat('str1', 'str2')"],
             ['default_kind' => 'DEFAULT', 'default_expression' => "today()"],
@@ -258,10 +258,10 @@ class SchemaBuilderTest extends DatabaseTestCase
         $this->assertEquals(1, $createResult);
 
         $expected = [
-            ['default_kind' => 'DEFAULT', 'default_expression' => "CAST('100', 'Int32')"],
-            ['default_kind' => 'DEFAULT', 'default_expression' => "CAST(100, 'Int32')"],
-            ['default_kind' => 'DEFAULT', 'default_expression' => "CAST(100, 'Nullable(UInt32)')"],
-            ['default_kind' => 'DEFAULT', 'default_expression' => "CAST('qweasdzxc1', 'Nullable(FixedString(10))')"],
+            ['default_kind' => 'DEFAULT', 'default_expression' => "'100'"],
+            ['default_kind' => 'DEFAULT', 'default_expression' => "100"],
+            ['default_kind' => 'DEFAULT', 'default_expression' => "100"],
+            ['default_kind' => 'DEFAULT', 'default_expression' => "'qweasdzxc1'"],
             ['default_kind' => 'DEFAULT', 'default_expression' => "'str1'"],
         ];
 
