@@ -25,6 +25,13 @@ class Connection extends \yii\db\Connection
     public $commandClass = 'bashkarev\clickhouse\Command';
 
     /**
+     * Additional options you can pass to clickhouse client constructor
+     *
+     * @var array
+     */
+    public $clientOptions = [];
+
+    /**
      * @var Client
      */
     private $_client;
@@ -55,12 +62,12 @@ class Connection extends \yii\db\Connection
         if ($this->_client === null) {
             $config = $this->parseDsn();
 
-            $this->_client = new Client([
+            $this->_client = new Client(array_merge([
                 'host' => $config['host'] ?? '127.0.0.1',
                 'port' => $config['port'] ?? 8123,
                 'username' => $this->username,
                 'password' => $this->password,
-            ],
+            ], $this->clientOptions),
                 array_merge([
                     'database' => $config['database'] ?? 'default',
                 ], $this->attributes ?? [])
