@@ -25,7 +25,7 @@ class Connection extends \yii\db\Connection
     public $commandClass = 'bashkarev\clickhouse\Command';
 
     /**
-     * Additional options you can pass into clickhouse client constructor
+     * Additional options you can pass to clickhouse client constructor
      *
      * @var array
      */
