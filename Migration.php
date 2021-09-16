@@ -14,6 +14,7 @@ use yii\di\Instance;
  */
 class Migration extends \yii\db\Migration
 {
+    use SchemaBuilderTrait;
 
     public $db = 'clickhouse';
 
