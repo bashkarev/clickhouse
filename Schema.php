@@ -14,6 +14,11 @@ use yii\db\TableSchema;
  */
 class Schema extends \yii\db\mysql\Schema
 {
+    /**
+     * UUID columnd data type
+     */
+    const TYPE_UUID = 'UUID';
+
     public $columnSchemaClass = 'bashkarev\clickhouse\ColumnSchema';
 
     /**
