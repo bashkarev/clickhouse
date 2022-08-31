@@ -39,7 +39,7 @@ class MigrateController extends \yii\console\controllers\MigrateController
             'date' => 'Date',
             'apply_time' => 'UInt32',
             'is_deleted' => 'UInt8' //0 active 1 //deleted
-        ], 'ENGINE=ReplacingMergeTree(date, version, 8192, apply_time)')->execute();
+        ], 'ENGINE=ReplacingMergeTree() ORDER BY date')->execute();
 
         $this->addMigrationHistory(self::BASE_MIGRATION);
         $this->stdout("Done.\n", Console::FG_GREEN);
