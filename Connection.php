@@ -32,6 +32,13 @@ class Connection extends \yii\db\Connection
     public $clientOptions = [];
 
     /**
+     * Settings of the clickhouse client
+     *
+     * @var array
+     */
+    public $clientSettings = [];
+
+    /**
      * @var Client
      */
     private $_client;
@@ -70,7 +77,7 @@ class Connection extends \yii\db\Connection
             ], $this->clientOptions),
                 array_merge([
                     'database' => $config['database'] ?? 'default',
-                ], $this->attributes ?? [])
+                ], $this->attributes ?? [], $this->clientSettings)
             );
         }
     }
